@@ -1,0 +1,395 @@
+Cleaning stats: {'input': 432, 'exact_dups': 37, 'near_dups': 7, 'too_short': 91, 'output': 297}
+Corpus tokens: 812904
+
+== Most frequent blocks (removed if over threshold) ==
+  73  i[00000,[],""]
+  73  ## this page could not be found.
+  73  __page__
+  40  our-services
+  23  id
+  23  research
+  23  rnd
+  22  activities
+  15  statutory
+  14  classification
+   8  material-component
+   6  marine-services
+   5  ###
+   5  ##
+   5  offshore-services
+   4  ## pt biro klasifikasi indonesia (persero)
+   4  ####
+   4  | management | top management | 0 | 00 | 0.00% |
+   4  | middle management | 00 | 00 | 00.00% | |
+   4  | islam | 000 | 00.00% | 00 | 00.00% |
+   4  | total management | 00 | 000 | 00.00% | |
+   4  | minangkabau | 00 | 0.00% | 0 | 0.00% |
+   4  | stem (science, technology, engineering, and mathematics)- related functions | 00 | 000 | 00.00% | |
+   4  | junior management | 0 | 00 | 00.00% | |
+   4  | batak | 00 | 0.00% | 0 | 0.00% |
+   4  | total | 000 | 000% | 00 | 000% |
+   4  | betawi | 000 | 00.00% | 0 | 0.00% |
+   4  | **keterangan** | **0000** | **0000** | **0000** | **0000** | |---|---|---|---|---|
+   4  esgrc
+   4  manufacturers-approval
+   3  bagi yang dinyatakan lolos, silakan mempersiapkan diri untuk tahapan seleksi selanjutnya.
+   3  bagi yang belum dinyatakan lolos, kami mengucapkan terima kasih atas partisipasinya dan mendorong untuk dapat mencoba kembali pada kesempatan berikutnya.
+   3  kami mengucapkan terima kasih atas partisipasi seluruh peserta.
+   3  📌 informasi resmi hanya diumumkan melalui kanal bki. undangan ke tahapan seleksi selanjutnya akan kami kirimkan melalui email bki: rec@bki.co.id
+   3  tetap pantau website dan media sosial kami untuk update berikutnya!
+   3  international-safety-management
+   2  ![dsc00000.jpg](https://cms.bki.co.id/uploads/dsc_00000_0f0ee00000.jpg) ![dsc00000.jpg](https://cms.bki.co.id/uploads/dsc_00000_a0eb0b0b0f.jpg)
+   2  ![img_0000.jpg](https://cms.bki.co.id/uploads/img_0000_c00e0efd00.jpg)
+   2  banjarmasin, 00 desember 0000 — direktur utama pt biro klasifikasi indonesia (persero) atau bki, r. benny susanto, melakukan kunjungan kerja ke pelabuhan trisak
+   2  ![whatsapp image 0000-00-00 at 00.00.00 (0).jpeg](https://cms.bki.co.id/uploads/whats_app_image_0000_00_00_at_00_00_00_0_00000000bf.jpeg) ![whatsapp image 0000-
+   2  ![narasi (0).jpg](https://cms.bki.co.id/uploads/narasi_0_00ab0cb00d.jpg)
+   2  pengumuman seleksi tahap v (seleksi interview user) rekrutmen engineer pt bki (persero)
+   2  ![whatsapp image 0000-00-00 at 00.00.00 (0).jpeg](https://cms.bki.co.id/uploads/whats_app_image_0000_00_00_at_00_00_00_0_0d00000ef0.jpeg)
+   2  stay tuned to our website and social media channels for further updates!
+   2  we would like to thank all participants for their interest and effort.
+   2  🔗 https://www.bki.co.id
+   2  ![img_0000.jpg](https://cms.bki.co.id/uploads/img_0000_b0000c00d0.jpg) ![img_0000.jpg](https://cms.bki.co.id/uploads/img_0000_b0aeafc00d.jpg)
+   2  ![p00_0000 (watermarked).jpg.jpeg](https://cms.bki.co.id/uploads/p00_0000_watermarked_jpg_db0000000b.jpeg) ![whatsapp image 0000-00-00 at 00.00.00.jpeg](https:/
+   2  pengumuman seleksi tahap iii (seleksi interview hc & psikotes) rekrutmen engineer bki
+   2  ![narasi (0).jpg](https://cms.bki.co.id/uploads/narasi_0_0f000dff0d.jpg)
+
+== 20 random chunks ==
+
+--- news-1159be4d-000 https://www.bki.co.id/news/pt-biro-klasifikasi-indonesia-persero-mengadakan-mudik-aman-sampai-tujuan-bersama-bumn-2025 (546 tok)
+PT Biro Klasifikasi Indonesia (Persero) Mengadakan Mudik Aman Sampai Tujuan bersama BUMN 2025
+
+PT Biro Klasifikasi Indonesia (Persero)/BKI menyelenggarakan Program Mudik Aman Sampai Tujuan Bersama BUMN 2025 sebagai bagian dari program TJSL Kementerian BUMN.
+
+PT Biro Klasifikasi Indonesia (Persero) sebagai lead Holding BUMN Jasa Survei / IDSurvey, gelar mudik bersama 2025 yang merupakan program dari Kementerian BUMN dengan tema “Mudik Aman Sampai Tujuan” dan merupakan program rutin Tanggung Jawab Sosial Lingkungan (TJSL) perusahaan. Pelepasan mudik tahun ini dilaksanakan pada Selasa, 25 Maret 2025 di Stasiun Pasar Senen dan Kamis, 27 Maret 2025 di Kantor Pusat BKI. Sebanyak 5 bus yang diikuti oleh kurang lebih 300 pemudik berasal dari masyarakat sekitar kantor dengan jurusan Malang, Surabaya, Semarang, Yogyakarta, Surakarta/Solo, Wonogiri.
+
+Mudik Bersama BUMN telah menjadi agenda rutin BUMN, hal ini sebagai wujud komitmen BUMN untuk terus memberikan manfaat bagi masyarakat Indonesia. Hal ini sesuai dengan keinginan Presiden Prabowo Subianto agar kita terus memberikan pelayanan yang baik bagi masyarakat. Bagi Kementerian BUMN, agenda mudik bersama ini serupa dengan kebijakan dalam me
+
+--- annual_report-dd95e82c-202 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (691 tok)
+BKI Annual Report 2024 > Remuneration of the Board of Commissioners > Realisation of the Board of Commissioners Work Program in 2024
+
+<!-- Start of picture text -->
+TATA KELOLA PERUSAHAAN<br>Good Corporate Governance<br><!-- End of picture text -->
+
+<!-- Start of picture text -->
+Bulan Ke-<br>Month<br>Kegiatan/Program Kerja<br>No<br>Activity/Work Program<br>1 2 3 4 5 6 7 8 9 10 11 12<br>a. Evaluasi penguatan pemenuhan prinsip tata kelola perusahaan yang baik,<br>termasuk atas hasil dan tindak lanjut penilaian penerapan tata kelola<br>perusahan yang baik<br>a. Evaluation of the strengthening of compliance with Good Corporate<br>Governance (GCG) principles, including results and follow-ups on<br>assessments of GCG implementation<br>b. Evaluasi penerapan manajemen risiko, secara menyeluruh termasuk tata<br>2 kelola manajemen risiko terintegrasi seluruh entitas IDSurvey<br>b. Evaluation of risk management implementation, comprehensively including<br>the integrated risk management governance across all IDSurvey entities<br>c. Evaluasi risiko yang bersifat strategis (tematik) sesuai dengan taksonomi<br>risiko BUMN dan Anak Perusahaan BUMN yang terintegrasi<br>c. Evaluation of strategic (
+
+--- news-d686281a-001 https://www.bki.co.id/news/id-survey-group-and-ary-ginanjar-university-collaborate-to-nurture-future-leaders-for-a-golden-indonesia-2045 (419 tok)
+IDSurvey Group and Ary Ginanjar University Collaborate to Nurture Future Leaders for a Golden Indonesia 2045
+
+During the event, R. Agus Doddy Dwi Sagita emphasized that the scholarship program embodies IDSurvey’s dedication to empowering Indonesia’s youth through education.
+
+“This initiative underscores our commitment to supporting the younger generation to continue striving for excellence. We encourage UAG students to make the most of this opportunity as they prepare for future professional and global challenges,” he said.
+
+He also shared that IDSurvey is exploring further collaborations with Ary Ginanjar University, including internship programs that will enable students to gain hands-on industrial experience.
+
+“We hope to expand this partnership into internship opportunities so that students can complement theoretical knowledge with practical learning from professionals,” he added.
+
+In addition to academic achievement, Mr. Doddy highlighted the importance of developing soft skills such as communication, adaptability, problem-solving, and teamwork—qualities essential for success in the professional world. He cited the example of Hanif, a UAG alumnus currently employed at IDSurvey
+
+--- service-cec09f71-000 https://www.bki.co.id/our-services/classification/ship-register (185 tok)
+Daftar Kapal
+
+Kami menyediakan layanan klasifikasi kapal yang independen dan andal untuk memastikan kapal Anda mematuhi standar keselamatan, lingkungan, dan kualitas internasional.
+
+dari
+
+hingga
+
+data
+
+Bendera
+
+GT Maksimum
+
+GT Minimum
+
+Pemilik
+
+Aktif
+
+Cari
+
+Detail:
+
+Hasil
+
+Menampilkan
+
+Suspend
+
+Data Lambung
+
+Nama Kapal
+
+Masukkan GT maksimum
+
+Masukkan GT minimum
+
+Nomor Register
+
+Jenis Kapal
+
+Memenuhi Penuh
+
+Data Umum
+
+Status Kelas
+
+Kapal tidak ditemukan
+
+Status Survey
+
+Masukkan nama kapal
+
+Data Permesinan
+
+Memenuhi Sebagian
+
+Masukkan nomor IMO
+
+Data Kapal
+
+Daftar Kapal
+
+Klik untuk melihat detail
+
+Silakan kembali dan periksa nomor register.
+
+Masukkan nomor register
+
+Coba masukkan kata kunci yang berbeda dan cari lagi.
+
+Kapal dengan register ini tidak ditemukan
+
+--- annual_report-dd95e82c-275 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (522 tok)
+BKI Annual Report 2024 > Risk Monitoring and Governance Committee > Composition of the Risk Monitoring and Corporate Governance Committee
+
+_Subsequently, based on the Resolution of the Board of Commissioners of PT Biro Klasifikasi Indonesia (Persero) Number SK.09/DEKOM.BKI/VI/2024 dated June 24, 2024, regarding the Appointment of Members of the Risk Monitoring and Corporate Governance Committee, the composition of the Committee was revised as follows:_
+
+|**No**|**Nama**<br>_Name_|**Jabatan**<br>_Position_|**Dasar Pengangkatan**<br>_Legal Basis for Appointment_|
+|---|---|---|---|
+|1|Virgo Eresta Jaya|Ketua Pemantau Risiko dan Tata Kelola<br>_Chairman of the Risk and Corporate_<br>_Governance Committee_|SK.03/DEKOM.BKI/I/2024 tanggal 16 Januari 2024<br>_SK.03/DEKOM.BKI/I/2024 dated 16 January 2024_|
+|2|Susyanto|Anggota Komite Pemantau Risiko dan<br>Tata Kelola dari unsur Anggota Dewan<br>Komisaris<br>_Member of the Risk and Corporate_<br>_Governance_<br>_form_<br>_the_<br>_Board_<br>_of_<br>_Commissioners_|SK.09/DEKOM.BKI/VI/2024 tanggal 24 Juni 2024<br>_SK.09/DEKOM.BKI/VI/2024 dated 24 June 2024_|
+|3|Diane Christina|Anggota Komite Pemantau Risiko dan<br>Tata Kelola<br>_Members of th
+
+--- annual_report-27dd281e-082 https://cms.bki.co.id/uploads/911998_AR_BKI_16102024_3659073406.pdf (685 tok)
+BKI Annual Report 2023 > Jejak Langkah Milestones > 1977 - 1988
+
+<!-- Start of picture text -->
+PROFIL PERUSAHAAN<br>Company Profile<br><!-- End of picture text -->
+
+<!-- Start of picture text --> 2018<br>BKI Academy diluncurkan dan mulai<br>beroperasi. 2023<br>BKI Academy launched and • IDSurvey membentuk IDSurvey<br>commenced operations Institute untuk mengelola sentralisasi<br>pelatihan dan pengembangan<br>kompetensi pegawai IDSurvey.<br>• IDSurvey meluncurkan Purpose grup<br>IDSurvey yaitu “We exist for the Safety<br>2016 2020 of Your Family and Mine” yang<br>kemudian digaungkan dalam semangat<br>Perseroan mengambil langkah “ One Family, One Purpose! ”.<br>• BKI terpilih kembali sebagai<br>strategis yang sangat penting dengan ACS Chairman .<br>mempersiapkan pendirian BKI • BKI re-elected as ACS Chairman • IDSurvey has established the IDSurvey<br>Academy. Lembaga pendidikan dan Institute to manage the centralization of<br>pelatihan ini berfungsi untuk training and the development of<br>mengembangkan karakter melalui IDSurvey employees' competencies.<br>pelatihan dasar dan mengembangkan • IDSurvey has launched the Purpose of<br>Sumber Daya Manusia yang the IDSurvey group, which i
+
+--- annual_report-27dd281e-530 https://cms.bki.co.id/uploads/911998_AR_BKI_16102024_3659073406.pdf (526 tok)
+BKI Annual Report 2023 > PT BIRO KLASIFIKASI INDONESIA (PERSERO) DAN ENTITAS ANAK / AND ITS SUBSIDIARIES > 32. OTHER INCOME (EXPENSES) – NET
+
+**_PT BIRO KLASIFIKASI INDONESIA (PERSERO) AND SUBSIDIARIES NOTES TO CONSOLIDATED FINANCIAL STATEMENTS_**
+
+**PT BIRO KLASIFIKASI INDONESIA (PERSERO) DAN ENTITAS ANAK CATATAN ATAS LAPORAN KEUANGAN KONSOLIDASIAN** Untuk Tahun-tahun yang Berakhir Pada Tanggal 31 Desember 2023 dan 2022 (Disajikan dalam Rupiah, kecuali dinyatakan lain)
+
+_For the Years Ended As of December 31, 2023 and 2022_ **_(_** _Expressed in Rupiah, unless otherwise stated)_
+
+||**31 De s e m be r 2023/**<br>**_Desember 31, 2023_**<br>**Rp**|**31 De s e m be r 2022/**<br>**_Desember 31, 2022_**<br>**Rp**||
+|---|---|---|---|
+|Pendapatan (beban) kurs|(3.287.773.985)|16.944.620.361|_Gain (loss) on foreign exchange_|
+|Penghas ilan bunga giro dan depos ito|83.635.172.021|52.631.614.093|_Interest incom e from giro and deposito_|
+|Laba penjualan as et|184.337.236|244.366.064|_Gain on sale of assets_|
+|Pendapatan diluar us aha lainnya|11.349.682.945|33.155.823.228|_Other non-b usiness incom es_|
+|Beban penyis ihan|(6.856.766.523)|(8.885.676.536)|_Bad deb t expense_|
+|Lainnya|(27.497.66
+
+--- sustainability_report-0bb13314-067 https://cms.bki.co.id/uploads/Sustainability_Report_BKI_2024_07052026_ecfa3d4c49.pdf (28 tok)
+BKI Sustainability Report BKI 2024 > Daftar Topik Material List of Material Topics
+
+[GRI 3-2]
+
+--- sustainability_report-0bb13314-015 https://cms.bki.co.id/uploads/Sustainability_Report_BKI_2024_07052026_ecfa3d4c49.pdf (243 tok)
+BKI Sustainability Report BKI 2024 > Sertifikasi > Certification
+
+||**ISO 17025:2017**<br>**Kompetensi Laboratorium**<br>_Testing and Calibration Laboratories_|
+|---|---|
+|**Masa Berlaku**<br>_Validity Period_|18 November 2027<br>_November 18, 2027_|
+|**Lingkup**|Kantor Pusat<br>_i_|
+|_Scope_|_Head Office_|
+|**Diterbitkan oleh**<br>_Issued by_|Komite Akreditasi Nasional|
+
+||**ISO 17065:2012**<br>**Penilaian Kesesuaian**<br>Conformity Assessment|
+|---|---|
+|**Masa Berlaku**<br>_Validity Period_|23 November 2026<br>_November 23, 2026_|
+|**Lingkup**|Kantor Pusat<br>_i_|
+|_Scope_|_Head Office_|
+|**Diterbitkan oleh**<br>_Issued by_|Komite Akreditasi Nasional|
+
+--- annual_report-dd95e82c-243 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (556 tok)
+BKI Annual Report 2024 > Implementation of the Board of Directors Work Program > 2.1.3. Program kerja dan progres pelaksanaan operasional TI
+
+_2.1.3. Work program & progress of IT operational implementation_
+
+|**No**|**Program Kerja**<br>_Work Program_|**Progres Pelaksanaan**<br>_Implementation Progress_|**Keterangan**<br>_Description_|
+|---|---|---|---|
+|1|Pengadaan ATS SAP<br>_SAP ATS Procurement_|100%|Proses pengadaan telah selesai dilakukan<br>_Procurement process has been completed_|
+|2|Genset Khusus Data Center BKI<br>_BKI Data Centre Dedicated Genset_|100%|Sudah terpasang dan dilakukan pengetesan pada tanggal 25<br>Januari 2023<br>_Installed and conducted the testing on January 25, 2023_|
+|3|_Maintenance PAC Data Center_<br>_Data Centre PAC Maintenance_|100%|Proses pengadaan telah selesai dilakukan<br>_Procurement process has been completed_|
+|4|_Maintenance Fire Suppression Data_<br>_Center_<br>_Maintenance of Fire Suppression Data_<br>_Center_|100%|Proses pengadaan telah selesai dilakukan<br>_Procurement process has been completed_|
+|5|_Maintenance UPS Data Center_<br>_Maintenance of UPS Data Center_|100%|Proses pengadaan telah selesai dilakukan<br>_Procurement process has
+
+--- esg-0e0f70da-001 https://www.bki.co.id/esgrc/corporate-social-responsibility (482 tok)
+Program Pengembangan Karyawan > ESG > Social > Pelatihan Pegawai: Program Pengembangan Karyawan > Pelatihan Karyawan
+
+**Rata-rata Jam Pelatihan Karyawan berdasarkan Level Jabatan (Jam/Orang)**
+
+| **Level Jabatan** | **2025** | **2024** | **2023** | **2022** |
+|---|---|---|---|---|
+
+| BOC | - | 29 | 26 | 24 |
+
+| BOD | 1 | 42 | 34 | 36 |
+
+| BOD-1 | 79 | 72 | 56 | 54 |
+
+| BOD-2 | 36 | 72 | 64 | 60 |
+
+| BOD-3 | 122 | 64 | 60 | 60 |
+
+| Staf dan setingkat | 2226 | 64 | 54 | 54 |
+
+| Jumlah | 2464 | 343 | 294 | 288 |
+
+**Rata-rata Jam Pelatihan Karyawan berdasarkan Status Karyawan (Jam/Orang)**
+
+| **Status Karyawan** | **2025** | **2024** | **2023** | **2022** |
+|---|---|---|---|---|
+
+| Karyawan Tetap | 2.286 | 640 | 634 | 637 |
+
+| Karyawan Kontrak | 110 | 155 | 199 | 145 |
+
+**Rata-rata Biaya Pelatihan per Karyawan (Rp/Orang)**
+
+| **Deskripsi** | **Satuan** | **2025** | **2024** | **2023** | **2022** |
+|---|---|---|---|---|---|
+
+| Total Biaya Pelatihan | Rp | 5,200,000,000 | 8,000,000,000 | 8,000,000,000 | 5,000,000,000 |
+
+| Jumlah Karyawan | Orang | 777 | 795 | 634 | 782 |
+
+| Rata-Rata Biaya Pelatihan per Karyawan | Rp/Orang | 6,692,407 | 10,062,893 | 12,618,297 | 6,393,862 |
+
+--- news-175d5af4-000 https://www.bki.co.id/news/bki-and-id-survey-deliver-humanitarian-aid-to-disaster-affected-communities-in-ntt (502 tok)
+BKI and IDSurvey Deliver Humanitarian Aid to Disaster-Affected Communities in NTT
+
+BKI and the IDSurvey Group provided humanitarian assistance to disaster-affected communities across seven regencies in East Nusa Tenggara, with aid including health supplies, children's essentials, and clothing.
+
+Jakarta, August 18, 2026 — PT Biro Klasifikasi Indonesia (Persero) (BKI), together with the IDSurvey Group, has provided humanitarian assistance to communities affected by disasters in East Nusa Tenggara (NTT). Coordinated by the Social and Environmental Responsibility (TJSL) units of BKI and IDSurvey, the assistance was delivered through the National Disaster Management Agency (BNPB) at its National Logistics Support Post at Halim Perdanakusuma Air Force Base, Jakarta.
+
+![DSC07880.JPG](https://cms.bki.co.id/uploads/DSC_07880_e1cd40fbe9.JPG)
+![DSC07866.JPG](https://cms.bki.co.id/uploads/DSC_07866_37286454bc.JPG)
+
+The assistance was handed over by Head of BKI’s TJSL Unit Arif Bijaksana Prawira Negara and his team. The aid included health supplies, essential items for infants and children, and clothing to help meet the immediate needs of communities affected across seven regencies in NTT: Mang
+
+--- annual_report-dd95e82c-035 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (522 tok)
+BKI Annual Report 2024 > Tinjauan Kinerja per Segmen PTSI > Implementation of Good Governance
+
+3. _Strategic partnerships, particularly with other SOEs and partners to enhance efficiency._
+
+4. _Optimalization of Business Forums (Portfolio, Regional, and Branch) as a communication platform to align business development and marketing strategies across IDSurvey entities._
+
+Manajemen optimis dengan prospek jangka pendek dan jangka panjang. Dalam jangka pendek, fokus pada peningkatan efisiensi operasional dan diversifikasi produk jasa layanan. Dalam jangka panjang, perusahaan mencanangkan menembus 20 besar global TIC dengan memperkuat pijakan sebagai pemimpin pasar di Indonesia, memperluas penawaran sebagai perusahaan global terintegrasi yang terkemuka dan membangun keunggulan sebagai penyedia layanan TIC kelas dunia.
+
+Pada tahun 2024 IDSurvey melakukan kajian organisasi dan bisnis termasuk penataan anak dan cucu perusahaan. Pengelolaan Holding akan terfokus pada pengembangan strategi untuk dijalankan seluruh Entitas IDSurvey yang meliputi strategi - strategi bidang sumberdaya & teknologi, keuangan, akuntansi & perpajakan, manajemen risiko, pengembangan bisnis & portofolio, proses bisni
+
+--- annual_report-dd95e82c-390 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (485 tok)
+BKI Annual Report 2024 > TJSL Priority Programs Performance > 3. Tabel Program CSV PT Surveyor Indonesia
+
+|**No**|**Program**|**RKA 2024**|**AUDITED 2024**|**%**|
+|---|---|---|---|---|
+|**1**|Program Pengendalian Sampah di Lingkungan Perusahaan<br>_Waste Management Program within the Company’s Environment_|100.000.000|100.000.000|100,00|
+|**2**|Peningkatan Kapasitas UMK<br>_MSME Capacity Building_|400.000.000|468.965.494|117,24|
+|**3**|Kegiatan Promosi, Eksibisi & Pameran<br>_Promotion, Exhibition & Fair Activities_|300.000.000|263.955.525|87,99|
+|**4**|Pelatihan Peningkatan Kompetensi Tenaga Kerja Usia Produktif<br>_Training Program to Improve the Competence of the Productive-Age_<br>_Workforce_|**200.000.000**|**188.288.288**|**94,14**|
+|**5**|Penerapan Teknologi Ramah Lingkungan<br>_Implementation of Environmentally Friendly Technology_|**300.000.000**|**116.600.000**|**38,87**|
+|**6**|Program KDK Kantor Pusat & Cabang<br>_KDK Program at Head Office & Branches_|**50.000.000**|**-**|**0,00**|
+|**7**|Program Penghijauan & Pelestarian Lingkungan<br>_Greening and Environmental Conservation Program_|**100.000.000**|**88.608.500**|**88,61**|
+|**8**|Program Pengukuran Dampak Bantuan<br
+
+--- annual_report-dd95e82c-147 https://cms.bki.co.id/uploads/AR_Final_Signed_Compressed_0d5feb927c.pdf (448 tok)
+BKI Annual Report 2024 > Sumber Daya Manusia > Human Resources
+
+_Debt Restructuring_
+
+Perseroan tidak melakukan restrukturisasi hutang pada tahun 2024
+
+_The Company did not conduct any debt restructuring in 2024._
+
+ANALISIS DAN PEMBAHASAN MANAJEMEN _Management DIscussion and Analysis_
+
+_Transactions Containing Conflict of Interest_
+
+Perseroan tidak melakukan transaksi yang mengandung benturan _The Company did not conduct transactions that contain conflicts of interest_ kepentingan pada tahun 2024. _in 2024._
+
+Tidak ada Perubahan Peraturan Perundang-undangan pada tahun 2024 yang _There were no changes in laws and regulations in 2023 that affect the_ mempengaruhi jalannya Perseroan. _running of the Company._
+
+_Changes in Accounting Policies_
+
+Tidak ada Perubahan Kebijakan Akuntansi pada tahun 2024 yang _There were no changes in accounting policies in 2023 that affect the_ mempengaruhi laporan keuangan Perseroan. _Company's financial statements._
+
+Business Support Overview
+
+TINJAUAN PENUNJANG BISNIS _Business Support Overview_
+
+www.bki.co.id
+
+PT BKI sebagai induk IDSurvey telah memiliki strategi untuk meningkatkan kualitas SDM sebagai bagian dari transformasi SDM menuju talenta unggul
+
+--- sustainability_report-0bb13314-214 https://cms.bki.co.id/uploads/Sustainability_Report_BKI_2024_07052026_ecfa3d4c49.pdf (130 tok)
+BKI Sustainability Report BKI 2024 > Biaya Pelatihan > Training Costs
+
+|**Uraian**<br>_Description_<br>**Jumlah Peserta**<br>_Number of Participants_|**Tanggal Pelaksanaan**<br>_Event Date_|
+|---|---|
+|Damkar Kelas D Kemnaker<br>_Firefighting Training Class D – Ministry of Manpower_<br>_(Kemnaker)_<br>20|-|
+|P3K Kemnaker<br>_First Aid Training – Ministry of Manpower (Kemnaker)_<br>20|-|
+
+--- event-bffd1dc7-000 https://www.bki.co.id/events/silaturahmi-idul-fitri-1447-h-melangkah-bersama-dalam-kebaikan (209 tok)
+Silaturahmi Idul Fitri 1447 H, Melangkah Bersama Dalam Kebaikan
+
+Location: Jakarta; Date: 6 April 2026
+
+BKI menyelenggarakan Silaturahmi Idul Fitri 1447 H pada Senin, 6 April 2026 di Ballroom Ali Sadikin sebagai ajang mempererat silaturahmi seluruh pegawai.
+
+BKI menyelenggarakan Silaturahmi Idul Fitri 1447 H pada Senin, 6 April 2026 di Ballroom Ali Sadikin sebagai ajang mempererat silaturahmi seluruh pegawai. Kegiatan ini dihadiri oleh pegawai Kantor Pusat serta seluruh jajaran Direksi.
+
+Acara diawali dengan pembacaan ayat suci Al-Qur’an, dilanjutkan dengan sambutan Direktur Utama BKI, R. Benny Susanto. Kegiatan ini juga menghadirkan Ustaz Maulana untuk menyampaikan tausiah sebagai bagian dari rangkaian acara.
+
+--- annual_report-27dd281e-447 https://cms.bki.co.id/uploads/911998_AR_BKI_16102024_3659073406.pdf (526 tok)
+BKI Annual Report 2023 > PT BIRO KLASIFIKASI INDONESIA (PERSERO) DAN ENTITAS ANAK / AND ITS SUBSIDIARIES > PT BIRO KLASIFIKASI INDONESIA (PERSERO) AND SUBSIDIARIES NOTES TO CONSOLIDATED FINANCIAL STATEMENTS
+
+- _i. The same taxable entity; or_
+
+- _ii. Different taxable entities which intend either to settle current tax liabilities and assets on a net basis, or to realize the assets and settle the liabilities simultaneously, in each future period in which significant amounts of deferred tax liabilities or assets are expected to be settled or recovered._
+
+- **_t. Transactions and balances in foreign currency_**
+
+_Transactions in foreign currencies during the year are recorded in Rupiah at the spot rate between Rupiah and foreign currencies on the transaction date. At the end of the reporting period, monetary items in foreign currencies are translated into Rupiah using the closing rate, which is Bank Indonesia middle rate on 31 December 2023 and 2022 as follows:_
+
+||**31 Desember/**<br>**_December,_**<br>**2023**|**31 Desember/**<br>**_December,_**<br>**2022**||
+|---|---|---|---|
+|1 Dolar Amerika Serikat|15.416|15.731|_1 United States Dollar_|
+|1 Dolar Singapura|11.711|11.659|_1 Singap
+
+--- sustainability_report-0bb13314-053 https://cms.bki.co.id/uploads/Sustainability_Report_BKI_2024_07052026_ecfa3d4c49.pdf (398 tok)
+BKI Sustainability Report BKI 2024 > Struktur Organisasi Organizational Structure
+
+Struktur organisasi PT BKI (Persero) pada tahun 2024 mengacu pada Surat Keputusan Direksi Nomor DU.150/LT.101/ KI-24 tanggal 29 November 2024 tentang Penyempurnaan Struktur Organisasi _Strategic Holding_ IDSurvey dan BKI Operasi PT Biro Klasifikasi Indonesia (Persero). Struktur ini dirancang untuk memastikan kejelasan fungsi pengelolaan holding dan operasional, serta mendukung efektivitas tata kelola dan pengambilan keputusan di seluruh lini organisasi.
+
+_The organizational structure of PT BKI (Persero) in 2024 refers to Board of Directors Decree No. DU.150/LT.101/KI-24 dated 29 November 2024 concerning the Refinement of the Organizational Structure of the IDSurvey Strategic Holding and BKI Operations of PT Biro Klasifikasi Indonesia (Persero). This structure was designed to ensure clear delineation between holding management and operational functions, while supporting effective governance and decision-making across all levels of the organization._
+
+Pada tahun pelaporan, Perusahaan dipimpin oleh Direktur Utama yang membawahi empat direktorat, yaitu Direktorat Pengembangan Sumber Daya; Direktorat Keua
+
+--- annual_report-27dd281e-285 https://cms.bki.co.id/uploads/911998_AR_BKI_16102024_3659073406.pdf (253 tok)
+BKI Annual Report 2023 > Akuntan Publik > Public Accountant
+
+_Based on the procurement process in accordance with applicable regulations and GCG principles, the Board of Commissioners has appointed the Public Accounting Firm (KAP) Paul Hadiwinata, Hidajat Arsono, Retno, Palilingan and Partners/PKF as the auditor of PT BKI's Financial Statements for the 2023 Financial Year._
+
+Akuntan Publik terbebas dari pengaruh Dewan Komisaris, Direksi dan pihak-pihak yang berkepentingan dalam perseroan, serta perseroan wajib menyediakan semua catatan akuntansi dan data penunjang yang diperlukan auditor eksternal sehingga memungkinkan auditor eksternal memberikan pendapatnya tentang kewajaran, ketaatan, keazasan dan kesesuaian laporan keuangan perusahaan dengan Standar Akuntansi Keuangan Indonesia.
+
+_The Public Accountant is free from the influence of the Board of Commissioners, Board of Directors and interested parties in the company, and the company is obliged to provide all accounting records and supporting data required by the external auditor so as to enable the external auditor to give his opinion on the fairness, compliance, fairness and conformity of the company's financial statements with

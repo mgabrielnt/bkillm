@@ -1,0 +1,8 @@
+# Runtime for the chatbot (terminal + Streamlit). Rebuilding the data needs: pip install -e ".[ingest]"
+streamlit>=1.40
+openai>=2.0
+python-dotenv>=1.0
+numpy>=2.0
+bm25s>=0.2
+tiktoken>=0.8
+langdetect>=1.0.9

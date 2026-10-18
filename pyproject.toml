@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bki-rag"
+version = "0.1.0"
+description = "RAG chatbot over the public content of bki.co.id"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=2.0",
+    "python-dotenv>=1.0",
+    "numpy>=2.0",
+    "bm25s>=0.2",
+    "tiktoken>=0.8",
+    "langdetect>=1.0.9",
+]
+
+[project.optional-dependencies]
+web = ["streamlit>=1.40"]
+ingest = ["httpx>=0.27", "datasketch>=1.6", "pymupdf4llm>=0.0.17"]
+
+[project.scripts]
+bki-rag = "bki_rag.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+# Large / rebuildable data. data/index/ (and data/processed/) are kept: the deployed app needs the index.
+data/raw/
+data/cache/
+data/index_plain/
+data/usage/
+data/*.log
+.claude/
+*.egg-info/
