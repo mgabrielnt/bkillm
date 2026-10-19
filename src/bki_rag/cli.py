@@ -42,8 +42,8 @@ def main() -> None:
         from .evaluation.runner import run
         run(args.config, answers=args.answers, limit=args.limit)
     if args.cmd == "ask":
-        from .app.chat import ask_once
+        from .app.terminal import ask_once
         ask_once(" ".join(args.question), debug=args.debug)
     if args.cmd == "chat":
-        from .app.chat import repl
+        from .app.terminal import repl
         repl(debug=args.debug)

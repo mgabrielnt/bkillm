@@ -1,4 +1,4 @@
-"""Terminal chatbot (no UI): `python -m bki_rag chat`."""
+"""Terminal chatbot: `python -m bki_rag chat` (interactive) and `python -m bki_rag ask "..."` (one question)."""
 from __future__ import annotations
 
 from ..core import config as C

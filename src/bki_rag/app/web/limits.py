@@ -1,10 +1,18 @@
-"""Usage guard for the public web app: a daily question cap shared by all users (protects the API balance)."""
+"""Usage guards for the public web app (they protect the API balance).
+
+  * DailyLimiter   a daily question cap shared by all visitors, stored in data/usage/ (resets on restart
+                   of a cloud server, so also set a spending limit at the API provider).
+  * session_block  per-visitor limits: questions per session and minimum seconds between questions.
+"""
 from __future__ import annotations
 
 import json
 import threading
+import time
 from datetime import date
 from pathlib import Path
+
+from ...core import config as C
 
 
 class DailyLimiter:
@@ -32,3 +40,12 @@ class DailyLimiter:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             self.path.write_text(json.dumps({today: used + 1}), encoding="utf-8")
             return True
+
+
+def session_block(asked: int, last_ask: float) -> str | None:
+    """Warning to show when this visitor must wait or stop, otherwise None."""
+    if asked >= C.SESSION_QUESTION_LIMIT:
+        return "Batas pertanyaan untuk sesi ini sudah tercapai. Silakan coba lagi nanti."
+    if time.time() - last_ask < C.MIN_SECONDS_BETWEEN_QUESTIONS:
+        return "Mohon tunggu beberapa detik sebelum bertanya lagi."
+    return None

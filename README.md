@@ -18,31 +18,46 @@ bukan panjang pertanyaan/jawaban.
 
 ## Struktur folder
 
+Aturan: setiap file maksimal 100 baris, satu tugas per file, dan setiap folder punya `__init__.py` yang
+menjelaskan isinya.
+
 ```
 bki/
-├── streamlit_app.py          # UI web (streamlit run streamlit_app.py)
-├── requirements.txt          # paket runtime (dipakai Streamlit Cloud)
-├── pyproject.toml            # paket bki_rag; extras: [web], [ingest]
-├── .env.example              # contoh konfigurasi lokal (.env tidak di-commit)
-├── .streamlit/
-│   ├── config.toml           # pengaturan Streamlit yang aman untuk publik
-│   └── secrets.toml.example  # contoh isi Secrets untuk deploy
+├── streamlit_app.py              # pembuka UI web (isi halaman ada di src/bki_rag/app/web/)
+├── requirements.txt              # paket runtime (dipakai Streamlit Cloud)
+├── pyproject.toml                # paket bki_rag; extras: [web], [ingest]
+├── .env.example                  # contoh konfigurasi lokal (.env tidak di-commit)
+├── .streamlit/                   # config.toml (aman untuk publik) + contoh Secrets
 ├── src/bki_rag/
-│   ├── cli.py                # python -m bki_rag <perintah>
-│   ├── prompts.py            # semua prompt LLM di satu file
-│   ├── core/                 # config, wrapper OpenAI, helper
-│   ├── ingestion/            # Tahap 1-4: crawl, ekstraksi, pembersihan, chunking
-│   ├── indexing/             # Tahap 5: konteks chunk, embedding + BM25
-│   ├── retrieval/            # Tahap 6a: rewrite pertanyaan, hybrid search, (rerank opsional)
-│   ├── generation/           # Tahap 6b: jawaban bersitasi
-│   ├── evaluation/           # golden set, juri LLM, runner eksperimen
-│   └── app/                  # chatbot terminal + pembatas pemakaian web
+│   ├── cli.py                    # python -m bki_rag <perintah>
+│   ├── core/                     # dasar bersama
+│   │   ├── config.py             #   path, model, parameter (bisa diubah lewat .env / Secrets)
+│   │   ├── llm.py                #   client OpenAI-compatible: chat, JSON, embedding, retry
+│   │   └── utils.py              #   JSONL, hash, hitung token, normalisasi teks
+│   ├── prompts/                  # SEMUA prompt, satu file per tahap
+│   │   ├── indexing.py           #   konteks chunk + glosarium
+│   │   ├── retrieval.py          #   rewrite pertanyaan + rerank
+│   │   ├── answer.py             #   system prompt chatbot
+│   │   └── evaluation.py         #   golden set + juri
+│   ├── ingestion/                # Tahap 1-4: situs -> chunk bersih
+│   │   ├── crawl/                #   fetcher.py, cms.py, site.py, pdfs.py
+│   │   ├── extract/              #   rsc.py, rsc_text.py, i18n.py, urls.py, pages.py, tiptap.py, cms.py, pdf.py
+│   │   ├── clean/                #   filters.py (boilerplate), dedup.py (exact + MinHash)
+│   │   ├── chunk/                #   units.py (paragraf, split), chunker.py (packing + metadata)
+│   │   └── pipeline.py           #   perintah `process`
+│   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py
+│   ├── retrieval/                # Tahap 6a: query.py, retriever.py, rerank.py (opsional)
+│   ├── generation/               # Tahap 6b: answer.py (jawaban bersitasi)
+│   ├── evaluation/               # golden.py, judge.py, runner.py
+│   └── app/
+│       ├── terminal.py           #   chatbot terminal (`chat` / `ask`)
+│       └── web/                  #   page.py, views.py, limits.py, errors.py (Streamlit)
 └── data/
-    ├── index/                # index yang dipakai aplikasi (di-commit, ±34 MB)
-    ├── processed/            # dokumen & chunk bersih + laporan pembersihan
-    ├── eval/                 # golden.jsonl + ringkasan hasil evaluasi
-    ├── raw/                  # hasil crawl mentah (lokal saja)
-    └── cache/                # cache berbayar: konteks, embedding, parsing PDF (lokal saja)
+    ├── index/                    # index yang dipakai aplikasi (di-commit, ±34 MB)
+    ├── processed/                # dokumen & chunk bersih + laporan pembersihan
+    ├── eval/                     # golden.jsonl + ringkasan hasil evaluasi
+    ├── raw/                      # hasil crawl mentah (lokal saja)
+    └── cache/                    # cache berbayar: konteks, embedding, parsing PDF (lokal saja)
 ```
 
 `data/raw/` dan `data/cache/` tidak ada di GitHub, tapi **jangan dihapus di lokal**: isinya membuat proses ulang
@@ -95,16 +110,16 @@ bukan kanal resmi BKI.
 
 ## Alur data
 
-1. **Crawl** (`ingestion/crawl.py`). bki.co.id adalah aplikasi Next.js di belakang WAF dengan CMS Strapi publik
+1. **Crawl** (`ingestion/crawl/`). bki.co.id adalah aplikasi Next.js di belakang WAF dengan CMS Strapi publik
    (`cms.bki.co.id/api`). Berita (EN 80 + ID 73), artikel, event, 58 halaman ESG (EN+ID), lowongan, dan daftar
    laporan diambil dari API JSON. Halaman statis diambil sebagai HTML dengan User-Agent jujur; halaman login
    dilewati; tidak ada upaya mengakali WAF. 22 URL "R&D activities" di sitemap ternyata halaman kosong.
-2. **Ekstraksi** (`ingestion/extract.py`). Teks halaman statis ada di kamus i18n dalam payload React Server
+2. **Ekstraksi** (`ingestion/extract/`). Teks halaman statis ada di kamus i18n dalam payload React Server
    Components (EN) dan `/locales/id/common.json` (ID); tiap namespace jadi satu dokumen dengan URL-nya. PDF
    (laporan tahunan 2024 & 2023, laporan keberlanjutan 2024, kebijakan HSE) diparse per halaman untuk sitasi.
-3. **Pembersihan** (`ingestion/clean.py`). Filter boilerplate dua bahasa, filter frekuensi lintas dokumen,
+3. **Pembersihan** (`ingestion/clean/`). Filter boilerplate dua bahasa, filter frekuensi lintas dokumen,
    header/footer PDF, normalisasi Unicode, dedup exact + MinHash, buang dokumen < 50 kata.
-4. **Chunking** (`ingestion/chunk.py`). Per heading, ±500 token, tabel utuh, breadcrumb di awal tiap chunk.
+4. **Chunking** (`ingestion/chunk/`). Per heading, ±500 token, tabel utuh, breadcrumb di awal tiap chunk.
 5. **Indexing** (`indexing/`). Tiap chunk diberi 1-3 kalimat konteks dua bahasa, lalu di-embed dan masuk BM25.
 6. **Retrieval + jawaban** (`retrieval/`, `generation/`). Pertanyaan ditulis ulang (mandiri + EN + ID + kata
    kunci), dicari dengan vektor dan BM25, digabung RRF; 10 chunk teratas diberi label "halaman situs aktif" atau
