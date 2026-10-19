@@ -49,17 +49,18 @@ SUSTAINABILITY_REPORT_LIMIT = int(_env("SUSTAINABILITY_REPORT_LIMIT", "1"))
 # --- Models (any OpenAI-compatible endpoint) ---------------------------------------
 # Empty = api.openai.com; e.g. https://ai.sumopod.com/v1 for the SumoPod gateway.
 BASE_URL = _env("OPENAI_BASE_URL", "") or None
-# Answering: gpt-5.4-mini is strong enough for grounded, cited answers without being overkill.
-CHAT_MODEL = _env("CHAT_MODEL", "gpt-5.4-mini")
+# Answering: gpt-5-nano measured ~$0.0006 per question (input $0.05, output $0.40 per 1M tokens).
+# gpt-5.4-mini scored best in evaluation (0.91 correct) at ~10x the price.
+CHAT_MODEL = _env("CHAT_MODEL", "gpt-5-nano")
 CHAT_REASONING = _env("CHAT_REASONING", "low")
-# Cheap helper tasks: query rewriting, reranking.
-FAST_MODEL = _env("FAST_MODEL", "gpt-5.4-nano")
-FAST_REASONING = _env("FAST_REASONING", "none")
+# Cheap helper tasks: query rewriting, reranking. gpt-5-nano accepts "minimal", not "none".
+FAST_MODEL = _env("FAST_MODEL", "gpt-5-nano")
+FAST_REASONING = _env("FAST_REASONING", "minimal")
 # Chunk contextualisation used to build data/index. Kept separate from FAST_MODEL on purpose: the 1,840
 # contexts are cached under this model's name, and changing it makes `index` regenerate (and pay for) all of them.
 CONTEXT_MODEL = _env("CONTEXT_MODEL", "gpt-5.4-nano")
 CONTEXT_REASONING = _env("CONTEXT_REASONING", "none")
-JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-5.4-mini")
+JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-5-mini")
 # Must stay the model the index was built with (data/index/meta.json), or query vectors won't match.
 EMBED_MODEL = _env("EMBED_MODEL", "text-embedding-3-large")
 LLM_CONCURRENCY = int(_env("LLM_CONCURRENCY", "16"))

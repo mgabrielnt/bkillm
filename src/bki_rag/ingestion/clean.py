@@ -23,7 +23,6 @@ BOILERPLATE_LINE = re.compile(
     r"(©|copyright|hak cipta).*|all rights reserved.*|\d+\s*(views?|dilihat)|page \d+( of \d+)?|halaman \d+|\d{1,4})\W*$",
     re.I,
 )
-ALLOWLIST = re.compile(r"^#", re.M)  # headings are never removed by frequency (they carry structure)
 
 
 def _norm_block(b: str) -> str:
