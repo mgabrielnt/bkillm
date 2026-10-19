@@ -8,6 +8,7 @@ MISSING_KEY = ("Layanan belum terkonfigurasi: OPENAI_API_KEY belum diisi. "
 
 
 def friendly_error(exc: Exception) -> str:
+    """Map an exception to a short message that says what to fix."""
     if isinstance(exc, openai.AuthenticationError) or "api_key" in str(exc).lower():
         return ("Layanan belum terkonfigurasi: API key kosong atau ditolak. Pemilik aplikasi: periksa "
                 "OPENAI_API_KEY dan OPENAI_BASE_URL di Settings > Secrets.")

@@ -17,17 +17,20 @@ _ANNOUNCEMENT = re.compile(r"pengumuman|announcement|seleksi|selection|rekrutmen
 
 
 def _load(name: str) -> list[dict]:
+    """Items of one saved CMS collection file ([] if missing)."""
     p = C.RAW_CMS / name
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 def _doc(it: dict, url: str, title: str, lang: str, doc_type: str, source: str, text: str) -> dict:
+    """Common document record for a CMS item."""
     return {"url": url, "title": title, "lang": lang, "doc_type": doc_type, "source": source,
             "group_id": it.get("documentId"), "published_at": it.get("publishedAt"),
             "lastmod": it.get("updatedAt"), "text": text}
 
 
 def _news(it: dict, lang: str) -> dict:
+    """Document for a news item or announcement."""
     title = it["title"].strip()
     kind = "announcement" if _ANNOUNCEMENT.search(title) else "news"
     text = f"# {title}\n\n{(it.get('description') or '').strip()}\n\n{blocks_md(it.get('blocks'))}"
@@ -35,6 +38,7 @@ def _news(it: dict, lang: str) -> dict:
 
 
 def _article(it: dict, lang: str) -> dict:
+    """Document for a technical article."""
     title = it["title"].strip()
     author = (it.get("author") or {}).get("name") if isinstance(it.get("author"), dict) else None
     text = (f"# {title}\n\n" + (f"Author: {author}\n\n" if author else "")
@@ -43,6 +47,7 @@ def _article(it: dict, lang: str) -> dict:
 
 
 def _event(it: dict, lang: str) -> dict:
+    """Document for an event."""
     title = it["title"].strip()
     meta = f"Location: {it.get('location') or '-'}; Date: {it.get('startDate') or '-'}"
     text = f"# {title}\n\n{meta}\n\n{(it.get('description') or '').strip()}\n\n{blocks_md(it.get('blocks'))}"
@@ -50,6 +55,7 @@ def _event(it: dict, lang: str) -> dict:
 
 
 def _esg(it: dict, lang: str) -> dict:
+    """Document for an ESG / sustainability page (TipTap content)."""
     menu = it.get("menu_keberlanjutan") or {}
     section = (menu.get("name") or "").split("-")[0].split("=")[0]
     label = menu.get("label_en" if lang == "en" else "label_id") or ""
@@ -61,6 +67,7 @@ def _esg(it: dict, lang: str) -> dict:
 
 
 def _job(it: dict) -> dict:
+    """Document for a job posting (Indonesian only)."""
     title = it["title"].strip()
     text = f"# Lowongan: {title}\n\nLokasi: {it.get('location') or '-'}\n\n{blocks_md(it.get('blocks'))}"
     doc = _doc(it, f"{C.SITE_URL}/opportunities", title, "id", "job", "cms:job", text)
@@ -69,6 +76,7 @@ def _job(it: dict) -> dict:
 
 
 def cms_docs() -> list[dict]:
+    """All CMS documents in English and Indonesian."""
     docs = []
     for lang in ("en", "id"):
         docs += [_news(it, lang) for it in _load(f"newss_{lang}.json")]

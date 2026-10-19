@@ -44,6 +44,7 @@ def linked_pdfs(known: set[str]) -> list[dict]:
 
 
 def crawl_pdfs(fetcher: Fetcher, manifest: list[dict]) -> None:
+    """Download the selected report PDFs (once per URL) into data/raw/pdf/."""
     C.RAW_PDF.mkdir(parents=True, exist_ok=True)
     targets = report_files("annual-reports", C.ANNUAL_REPORT_YEARS, None)
     targets += report_files("sustainability-reports", None, C.SUSTAINABILITY_REPORT_LIMIT)

@@ -20,6 +20,7 @@ class RetrievalConfig:
 
 
 def reciprocal_rank_fusion(ranked_lists: list[list[tuple[int, float]]], k: int = C.RRF_K) -> list[int]:
+    """Merge ranked lists: items ranked high in many lists come first."""
     fused: dict[int, float] = {}
     for lst in ranked_lists:
         for rank, (idx, _) in enumerate(lst):
@@ -29,6 +30,7 @@ def reciprocal_rank_fusion(ranked_lists: list[list[tuple[int, float]]], k: int =
 
 class Retriever:
     def __init__(self, index: Index | None = None):
+        """Search the given index (default: data/index)."""
         self.index = index or Index()
 
     def search(self, question: str, history: list[dict] | None = None,

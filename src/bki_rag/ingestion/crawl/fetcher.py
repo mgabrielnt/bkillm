@@ -21,11 +21,13 @@ class Fetcher:
     """GET with a fixed delay between requests and exponential backoff on failures."""
 
     def __init__(self, delay: float = C.REQUEST_DELAY_S):
+        """HTTP client with the honest User-Agent and the delay between requests."""
         self.delay = delay
         self._last = 0.0
         self.client = httpx.Client(headers={"User-Agent": C.USER_AGENT}, timeout=120, follow_redirects=True)
 
     def get(self, url: str, retries: int = 4) -> httpx.Response:
+        """GET a URL politely; retries on network errors, 5xx and WAF rejections."""
         resp = None
         for attempt in range(retries + 1):
             wait = self.delay - (time.time() - self._last)
@@ -57,4 +59,5 @@ def slug(url: str) -> str:
 
 
 def now() -> str:
+    """Current UTC time as ISO text, for the manifest."""
     return datetime.now(timezone.utc).isoformat(timespec="seconds")

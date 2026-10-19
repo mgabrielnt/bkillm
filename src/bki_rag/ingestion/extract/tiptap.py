@@ -18,6 +18,7 @@ def tiptap_to_md(node: dict | list | str | None) -> str:
     t, kids = node.get("type"), node.get("content", [])
 
     def inner() -> str:
+        """Markdown of this node's children."""
         return "".join(tiptap_to_md(k) for k in kids)
 
     if t == "text":
@@ -42,6 +43,7 @@ def tiptap_to_md(node: dict | list | str | None) -> str:
 
 
 def _table_md(rows_nodes: list[dict]) -> str:
+    """Markdown table from TipTap table rows."""
     rows = [[tiptap_to_md(c).strip().replace("\n", " ").replace("|", "/") for c in r.get("content", [])]
             for r in rows_nodes]
     if not rows:

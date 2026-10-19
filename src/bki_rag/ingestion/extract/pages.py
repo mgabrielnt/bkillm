@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 from ...core import config as C
 from ...core.utils import read_jsonl
-from .i18n import namespace_title, render_namespace, word_count
+from .i18n import render_namespace
 from .rsc import find_translations, merge_resolved, parse_flight, resolve_refs
 from .rsc_text import tree_text
 from .urls import doc_type_from_url, map_namespace_url
@@ -23,6 +23,7 @@ SKIP_NAMESPACES = {"nav", "common", "footer", "header", "auth", "login", "form",
 
 
 def page_docs() -> list[dict]:
+    """Documents for all static pages: dictionary namespaces (EN + ID) and page text."""
     site = [m for m in read_jsonl(C.MANIFEST)
             if m["source"] == "site" and m["status"] == "ok" and m["raw_path"].endswith(".html")]
     site_paths = [urlparse(m["url"]).path or "/" for m in site]
@@ -52,6 +53,7 @@ def page_docs() -> list[dict]:
 def _namespace_docs(ns: str, val: dict, lang: str, site_paths: list[str]) -> list[dict]:
     # A namespace like "statutory" holds a dozen sub-pages (solas, marpol, loadLine, ...): give each big
     # child its own document and URL so citations point at the right page.
+    """One document per namespace, or per sub-page for very large namespaces."""
     parts = {ns: val}
     if word_count(val) > 1200:
         children = {k: v for k, v in val.items() if isinstance(v, dict) and word_count(v) >= 100}
@@ -67,3 +69,20 @@ def _namespace_docs(ns: str, val: dict, lang: str, site_paths: list[str]) -> lis
                      "source": f"i18n:{ns}" + (f".{key}" if key != ns else ""), "published_at": None,
                      "lastmod": None, "text": f"# {title}\n\n" + "\n\n".join(body)})
     return docs
+
+
+def word_count(o) -> int:
+    """Total words in a (nested) dictionary value."""
+    if isinstance(o, dict):
+        return sum(word_count(v) for v in o.values())
+    if isinstance(o, list):
+        return sum(word_count(v) for v in o)
+    return len(str(o).split())
+
+
+def namespace_title(ns: str, val: dict) -> str:
+    """Title of a namespace document (its title key, or the namespace name)."""
+    for k in ("title", "heading", "pageTitle", "hero_title", "heroTitle"):
+        if isinstance(val.get(k), str) and len(val[k].split()) <= 12:
+            return val[k].strip()
+    return re.sub(r"([a-z])([A-Z])", r"\1 \2", ns).replace("-", " ").replace("_", " ").title()

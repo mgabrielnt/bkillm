@@ -14,16 +14,20 @@ _LABEL_WORDS = {"title", "heading", "subtitle", "label", "desc", "description", 
 def _order_kebab(d: dict) -> list[str]:
     """Order for kebab-case keys ("our-vision", "vision-text", "mission-1", "milestone-1964-title")."""
     def parts(k: str) -> list[str]:
+        """Key split into lowercase words."""
         return [p for p in re.split(r"[-_]", k.lower()) if p]
 
     def stem(k: str) -> str:
+        """Topic of a key without label words and indexes, so a label and its text group together."""
         return " ".join(p for p in parts(k) if p not in _LABEL_WORDS and not re.fullmatch(r"p?\d{1,2}", p))
 
     def index(k: str) -> int:
+        """List position in a key (mission-2 -> 2), 0 if none."""
         nums = [int(p.lstrip("p")) for p in parts(k) if re.fullmatch(r"p?\d{1,2}", p)]
         return nums[0] if nums else 0
 
     def rank(k: str) -> int:
+        """Labels first, then subtitles, then text."""
         p = parts(k)
         return 0 if p[0] == "our" or p[-1] in ("title", "heading") else 1 if p[-1] == "subtitle" else 2
 
@@ -41,6 +45,7 @@ def _order_camel(d: dict) -> list[str]:
         groups.setdefault(_SUFFIX.sub("", k).lower() or k, []).append(k)
 
     def rank(k: str) -> int:
+        """Titles first, then subtitles, then text."""
         kl = k.lower()
         return 0 if kl.endswith(("title", "heading")) else 1 if kl.endswith("subtitle") else 2
 
@@ -49,6 +54,7 @@ def _order_camel(d: dict) -> list[str]:
 
 
 def _is_heading(key: str, value: str) -> bool:
+    """True when a short title-like value should become a Markdown heading."""
     k = key.lower()
     return (k.endswith(("title", "heading")) or k.startswith("our-")) and len(value.split()) <= 14 \
         and not value.endswith(".")
@@ -76,18 +82,3 @@ def render_namespace(d: dict, depth: int = 2) -> list[str]:
         elif isinstance(v, list):
             lines += [f"- {x}" for x in v if isinstance(x, str)]
     return lines
-
-
-def word_count(o) -> int:
-    if isinstance(o, dict):
-        return sum(word_count(v) for v in o.values())
-    if isinstance(o, list):
-        return sum(word_count(v) for v in o)
-    return len(str(o).split())
-
-
-def namespace_title(ns: str, val: dict) -> str:
-    for k in ("title", "heading", "pageTitle", "hero_title", "heroTitle"):
-        if isinstance(val.get(k), str) and len(val[k].split()) <= 12:
-            return val[k].strip()
-    return re.sub(r"([a-z])([A-Z])", r"\1 \2", ns).replace("-", " ").replace("_", " ").title()

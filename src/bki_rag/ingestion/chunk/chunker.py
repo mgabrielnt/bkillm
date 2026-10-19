@@ -13,6 +13,7 @@ from .units import detect_lang, split_long, units
 
 
 def _pack(doc: dict) -> list[list[dict]]:
+    """Group a document's paragraph units into chunk-sized lists."""
     target, max_tok = C.CHUNK_TARGET_TOKENS, C.CHUNK_MAX_TOKENS
     us = units(doc)
     if "pages" not in doc and count_tokens(doc["full_text"]) <= max_tok:
@@ -38,6 +39,7 @@ def _pack(doc: dict) -> list[list[dict]]:
 
 
 def chunk_document(doc: dict, doc_id: str) -> list[dict]:
+    """Turn one clean document into chunk records with breadcrumb and citation metadata."""
     chunks = []
     for i, g in enumerate(x for x in _pack(doc) if x):
         section = next((u["path"] for u in reversed(g) if u["path"]), [])

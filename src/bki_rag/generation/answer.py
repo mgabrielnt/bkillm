@@ -15,6 +15,7 @@ LANG_NAMES = {"id": "Indonesian", "en": "English"}
 
 class RAG:
     def __init__(self, retriever: Retriever | None = None, cfg: RetrievalConfig = RetrievalConfig()):
+        """Use the given retriever (default: data/index) and retrieval configuration."""
         self.retriever = retriever or Retriever()
         self.cfg = cfg
 

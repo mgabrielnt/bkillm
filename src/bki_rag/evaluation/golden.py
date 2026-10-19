@@ -45,6 +45,7 @@ _ID_WORDS = ("berapa", "apakah", "siapa", "bagaimana", "kapan", "tuliskan")
 
 
 def build_golden() -> None:
+    """Draft the golden test set from stratified random chunks into data/eval/golden.jsonl."""
     rng = random.Random(42)
     by_type: dict[str, list[dict]] = defaultdict(list)
     for c in read_jsonl(C.CHUNKS_FILE):
@@ -58,6 +59,7 @@ def build_golden() -> None:
              for c in picks]
 
     def draft(task):
+        """Ask the judge model for one question + reference answer about this chunk."""
         c, qlang, style = task
         return chat_json([{"role": "user", "content": GOLDEN_PROMPT.format(
             title=c["title"], doc_type=c["doc_type"], date=(c.get("published_at") or "")[:10],

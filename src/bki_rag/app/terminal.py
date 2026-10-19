@@ -8,6 +8,7 @@ HELP = "Perintah: /reset (hapus riwayat), /debug (tampilkan chunk), /exit (kelua
 
 
 def _print_result(res: dict, debug: bool) -> None:
+    """Print one answer with its numbered sources (and the retrieved chunks in debug mode)."""
     print(f"\nBot: {res['answer']}\n")
     if res["sources"]:
         english = res["query"].get("lang") == "en"
@@ -25,10 +26,12 @@ def _print_result(res: dict, debug: bool) -> None:
 
 
 def ask_once(question: str, debug: bool = False) -> None:
+    """Answer a single question from the command line (`ask`)."""
     _print_result(RAG().answer(question), debug)
 
 
 def repl(debug: bool = False) -> None:
+    """Interactive chat loop with history and /reset, /debug, /exit (`chat`)."""
     rag = RAG()
     history: list[dict] = []
     print(f"BKI RAG chatbot ({C.CHAT_MODEL} + {rag.retriever.index.meta['embed_model']}, "

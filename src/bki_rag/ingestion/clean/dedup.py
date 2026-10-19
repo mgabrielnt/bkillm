@@ -14,6 +14,7 @@ from .filters import norm_block
 
 
 def _minhash(text: str) -> MinHash:
+    """MinHash signature of a text from 5-word shingles."""
     words = re.findall(r"\w+", text.lower())
     m = MinHash(num_perm=128)
     for i in range(max(1, len(words) - 4)):
@@ -22,6 +23,7 @@ def _minhash(text: str) -> MinHash:
 
 
 def _add_alias(keep: dict, dup: dict) -> None:
+    """Remember a duplicate's URL as an alias of the kept document."""
     if dup["url"] != keep["url"]:
         keep.setdefault("aliases", []).append(dup["url"])
 

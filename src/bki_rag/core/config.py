@@ -14,6 +14,7 @@ load_dotenv(ROOT / ".env")
 
 
 def _env(name: str, default: str) -> str:
+    """Setting from the environment / .env, or the default."""
     return os.getenv(name, default)
 
 

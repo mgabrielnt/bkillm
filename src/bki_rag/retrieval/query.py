@@ -6,6 +6,7 @@ from ..prompts import REWRITE_PROMPT
 
 
 def detect_lang(text: str) -> str:
+    """'id' or 'en' for a question (English when unsure)."""
     from langdetect import detect
     try:
         return "id" if detect(text) in ("id", "ms") else "en"

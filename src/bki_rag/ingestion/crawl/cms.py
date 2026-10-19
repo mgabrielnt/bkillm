@@ -37,6 +37,7 @@ def fetch_collection(fetcher: Fetcher, name: str, query: str, locale: str | None
 
 
 def crawl_cms(fetcher: Fetcher, manifest: list[dict]) -> None:
+    """Download every CMS collection (per language) into data/raw/cms/."""
     C.RAW_CMS.mkdir(parents=True, exist_ok=True)
     for name, locales, query in CMS_COLLECTIONS:
         for loc in locales:

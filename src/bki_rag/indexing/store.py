@@ -26,11 +26,13 @@ bagaimana mengapa berapa""".split())
 
 
 def tokenize(text: str) -> list[str]:
+    """Lowercase word tokens for BM25, without bilingual stopwords."""
     return [t for t in re.findall(r"[a-z0-9]+(?:[.\-/][a-z0-9]+)*", text.lower()) if t not in STOPWORDS]
 
 
 class Index:
     def __init__(self, path: Path = C.INDEX_DIR):
+        """Load embeddings, BM25 and chunk metadata from an index directory."""
         self.path = path
         self.chunks: list[dict] = list(read_jsonl(path / "chunks.jsonl"))
         self.emb = np.load(path / "embeddings.npy")
@@ -38,11 +40,13 @@ class Index:
         self.meta = json.loads((path / "meta.json").read_text(encoding="utf-8"))
 
     def vector_search(self, qvec: np.ndarray, k: int) -> list[tuple[int, float]]:
+        """Top-k chunks by cosine similarity to a query vector."""
         scores = self.emb @ qvec
         top = np.argsort(-scores)[:k]
         return [(int(i), float(scores[i])) for i in top]
 
     def bm25_search(self, query: str, k: int) -> list[tuple[int, float]]:
+        """Top-k chunks by BM25 keyword score (positive scores only)."""
         toks = tokenize(query)
         if not toks:
             return []

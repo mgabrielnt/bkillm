@@ -23,6 +23,7 @@ def _load() -> tuple[RAG, DailyLimiter]:
 
 
 def _ask(rag: RAG, question: str) -> None:
+    """Show the question, answer it and keep both in the session history."""
     ss = st.session_state
     ss.asked += 1
     ss.last_ask = time.time()
@@ -42,6 +43,7 @@ def _ask(rag: RAG, question: str) -> None:
 
 
 def main() -> None:
+    """Render the chat page: header, password gate, history, question box and limits."""
     st.title(TITLE)
     st.caption(DISCLAIMER)
     password_gate()

@@ -11,6 +11,7 @@ from ..prompts import RERANK_PROMPT
 
 
 def rerank(question: str, candidates: list[dict]) -> list[tuple[dict, float]]:
+    """Score candidates 0-10 with the fast model and sort them best first."""
     passages = "\n\n".join(
         f'<passage id="{i}" title="{c["title"]}" date="{(c.get("published_at") or "")[:10]}">\n'
         f'{c["text"][:1400]}\n</passage>' for i, c in enumerate(candidates))

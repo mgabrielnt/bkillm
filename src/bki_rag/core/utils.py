@@ -13,6 +13,7 @@ import tiktoken
 
 
 def read_jsonl(path: Path) -> Iterator[dict]:
+    """Yield one dict per line of a JSONL file."""
     with open(path, encoding="utf-8") as f:
         for line in f:
             if line.strip():
@@ -20,6 +21,7 @@ def read_jsonl(path: Path) -> Iterator[dict]:
 
 
 def write_jsonl(path: Path, rows: Iterable[dict]) -> int:
+    """Write dicts as JSONL, one per line; returns the number of rows."""
     path.parent.mkdir(parents=True, exist_ok=True)
     n = 0
     with open(path, "w", encoding="utf-8") as f:
@@ -30,6 +32,7 @@ def write_jsonl(path: Path, rows: Iterable[dict]) -> int:
 
 
 def sha256(data: str | bytes) -> str:
+    """Hex SHA-256 of a string or bytes (used for dedup and caching)."""
     if isinstance(data, str):
         data = data.encode("utf-8")
     return hashlib.sha256(data).hexdigest()
@@ -37,14 +40,17 @@ def sha256(data: str | bytes) -> str:
 
 @lru_cache(maxsize=1)
 def _encoder():
+    """The tiktoken tokenizer used for counting (loaded once)."""
     return tiktoken.get_encoding("o200k_base")
 
 
 def count_tokens(text: str) -> int:
+    """Number of tokens in a text (o200k_base)."""
     return len(_encoder().encode(text, disallowed_special=()))
 
 
 def truncate_tokens(text: str, max_tokens: int) -> str:
+    """Cut a text to at most max_tokens tokens."""
     enc = _encoder()
     ids = enc.encode(text, disallowed_special=())
     return text if len(ids) <= max_tokens else enc.decode(ids[:max_tokens])

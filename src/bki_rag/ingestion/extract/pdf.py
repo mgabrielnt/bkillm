@@ -15,6 +15,7 @@ _KINDS = {"annual-reports": "annual_report", "sustainability-reports": "sustaina
 
 
 def _pages(m: dict) -> list[dict]:
+    """Per-page Markdown of a PDF (from cache, or parsed and cached)."""
     cache = C.CACHE_DIR / f"pdf_{m['sha256'][:16]}.json"
     if cache.exists():
         return json.loads(cache.read_text(encoding="utf-8"))
@@ -30,6 +31,7 @@ def _pages(m: dict) -> list[dict]:
 
 
 def pdf_docs() -> list[dict]:
+    """One document per downloaded PDF, keeping page numbers."""
     docs = []
     for m in read_jsonl(C.MANIFEST):
         if m["source"] != "pdf" or m["status"] != "ok":

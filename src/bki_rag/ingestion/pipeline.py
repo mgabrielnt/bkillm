@@ -18,6 +18,7 @@ LISTING_PATHS = {"/", "/news", "/articles", "/events", "/photos", "/podcasts", "
 
 
 def run() -> None:
+    """Extract, clean and chunk; write data/processed/ and a review report."""
     docs = cms_docs()
     site = page_docs()
     docs += [d for d in site if not (d["source"] == "site-tree" and (urlparse(d["url"]).path or "/") in LISTING_PATHS)]

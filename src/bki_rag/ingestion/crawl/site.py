@@ -16,6 +16,7 @@ CMS_DETAIL_PREFIXES = ("/news/", "/articles/", "/events/", "/research/rnd/techni
 
 
 def read_sitemap(fetcher: Fetcher) -> list[dict]:
+    """All URLs (with lastmod dates) listed in sitemap.xml."""
     xml = fetcher.get(C.SITEMAP_URL).text
     rows = []
     for block in re.findall(r"<url>(.*?)</url>", xml, re.S):

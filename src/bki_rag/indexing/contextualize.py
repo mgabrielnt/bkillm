@@ -31,6 +31,7 @@ def _document_window(chunk: dict, doc_chunks: list[dict]) -> str:
 
 
 def describe_chunk(chunk: dict, doc_chunks: list[dict]) -> str:
+    """Ask the context model for 1-3 sentences situating this chunk in its document."""
     prompt = CONTEXT_PROMPT.format(
         title=chunk["title"], url=chunk["url"], doc_type=chunk["doc_type"], chunk=chunk["text"], glossary=GLOSSARY,
         document=truncate_tokens(_document_window(chunk, doc_chunks), C.CONTEXT_WINDOW_TOKENS + 1500))
@@ -52,6 +53,7 @@ def add_context(chunks: list[dict]) -> None:
     lock = threading.Lock()
 
     def work(c: dict) -> None:
+        """Describe one chunk and append the result to the cache file."""
         ctx = describe_chunk(c, by_doc[c["doc_id"]])
         with lock:
             cache[c["content_hash"]] = ctx

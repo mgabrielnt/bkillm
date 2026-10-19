@@ -23,6 +23,7 @@ def norm_block(b: str) -> str:
 
 
 def blocks(text: str) -> list[str]:
+    """Split text into paragraph-like blocks (blank lines, list items, headings, tables)."""
     return [b for b in re.split(r"\n\s*\n|\n(?=[-*#|] )", text) if b.strip()]
 
 

@@ -15,6 +15,7 @@ REPORT_TYPES = {"annual_report", "sustainability_report"}
 
 
 def _crawl_date() -> str:
+    """Date of the last crawl (manifest file time), the age of website pages."""
     try:
         return datetime.fromtimestamp(C.MANIFEST.stat().st_mtime).strftime("%Y-%m-%d")
     except OSError:
@@ -22,6 +23,7 @@ def _crawl_date() -> str:
 
 
 def _status(chunk: dict, crawled: str) -> str:
+    """How current a source is: report year, publication date or live website page."""
     if chunk["doc_type"] in REPORT_TYPES:
         return f"report covering year {(chunk.get('published_at') or '')[:4] or 'unknown'}"
     if chunk.get("published_at"):

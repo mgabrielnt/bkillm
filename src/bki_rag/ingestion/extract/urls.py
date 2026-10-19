@@ -36,6 +36,7 @@ _DOC_TYPES = (("/our-services", "service"), ("/news", "news"), ("/articles", "ar
 
 
 def _words(key: str) -> set[str]:
+    """Lowercase words of a key or path segment (camelCase and kebab-case split)."""
     key = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
     return {w for w in re.split(r"[^a-zA-Z0-9]+", key.lower()) if w}
 
@@ -59,5 +60,6 @@ def map_namespace_url(ns: str, site_paths: list[str]) -> str:
 
 
 def doc_type_from_url(url: str) -> str:
+    """Document type (service, news, esg, ...) from the URL path."""
     path = urlparse(url).path
     return next((kind for prefix, kind in _DOC_TYPES if path.startswith(prefix)), "company")

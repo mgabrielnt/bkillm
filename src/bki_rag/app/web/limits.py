@@ -19,19 +19,23 @@ class DailyLimiter:
     """Counts questions per calendar day in a small JSON file. Thread-safe within one server process."""
 
     def __init__(self, path: Path, limit: int):
+        """Allow at most `limit` questions per day, counted in the JSON file at `path`."""
         self.path, self.limit = path, limit
         self._lock = threading.Lock()
 
     def _read(self) -> dict:
+        """Counter file contents ({} when missing or unreadable)."""
         try:
             return json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return {}
 
     def used_today(self) -> int:
+        """Number of questions already asked today."""
         return int(self._read().get(date.today().isoformat(), 0))
 
     def try_consume(self) -> bool:
+        """Count one question; False when today's limit is already reached."""
         with self._lock:
             today = date.today().isoformat()
             used = int(self._read().get(today, 0))

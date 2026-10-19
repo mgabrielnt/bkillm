@@ -18,8 +18,8 @@ bukan panjang pertanyaan/jawaban.
 
 ## Struktur folder
 
-Aturan: setiap file maksimal 100 baris, satu tugas per file, dan setiap folder punya `__init__.py` yang
-menjelaskan isinya.
+Aturan: setiap file maksimal 100 baris, satu tugas per file, setiap fungsi punya komentar singkat
+(docstring), dan setiap folder punya `__init__.py` yang menjelaskan isinya.
 
 ```
 bki/
@@ -45,10 +45,10 @@ bki/
 │   │   ├── clean/                #   filters.py (boilerplate), dedup.py (exact + MinHash)
 │   │   ├── chunk/                #   units.py (paragraf, split), chunker.py (packing + metadata)
 │   │   └── pipeline.py           #   perintah `process`
-│   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py
+│   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py
 │   ├── retrieval/                # Tahap 6a: query.py, retriever.py, rerank.py (opsional)
-│   ├── generation/               # Tahap 6b: answer.py (jawaban bersitasi)
-│   ├── evaluation/               # golden.py, judge.py, runner.py
+│   ├── generation/               # Tahap 6b: sources.py, citations.py, answer.py
+│   ├── evaluation/               # golden.py, retrieval_eval.py, judge.py, runner.py
 │   └── app/
 │       ├── terminal.py           #   chatbot terminal (`chat` / `ask`)
 │       └── web/                  #   page.py, views.py, limits.py, errors.py (Streamlit)
@@ -91,6 +91,28 @@ Evaluasi (berbayar; `--limit` = sampel kecil yang murah):
 ```powershell
 python -m bki_rag eval --config full --answers --limit 30
 ```
+
+## Melihat isi vektor embedding
+
+Vektor tersimpan di `data/index/`:
+
+| File | Isi |
+|---|---|
+| `embeddings.npy` | matriks float32 1840 × 3072 (`text-embedding-3-large`); satu baris = satu chunk, sudah dinormalisasi (panjang 1) sehingga dot product = cosine similarity |
+| `chunks.jsonl` | teks + metadata tiap chunk, urutannya sama dengan baris matriks (baris i = baris ke-i file ini) |
+| `meta.json` | model embedding dan apakah contextual retrieval dipakai |
+| `bm25/` | index kata kunci (BM25) untuk chunk yang sama |
+
+Cara membukanya (gratis, tanpa API):
+
+```powershell
+python -m bki_rag vectors                                  # info index + vektor chunk pertama + chunk termirip
+python -m bki_rag vectors --chunk service-13d66e12-000     # chunk tertentu (id dari chunks.jsonl)
+python -m bki_rag vectors --export vektor.csv --rows 20    # 20 vektor lengkap ke CSV (buka di Excel)
+python -m bki_rag vectors --query "masa berlaku sertifikat garis muat"   # cari dengan teks (biaya ±Rp0,03)
+```
+
+Atau langsung di Python: `numpy.load("data/index/embeddings.npy")`.
 
 ## Deploy (Streamlit Community Cloud)
 

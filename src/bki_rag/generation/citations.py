@@ -28,6 +28,7 @@ def display_title(chunk: dict) -> str:
 
 
 def _source_key(chunk: dict) -> tuple:
+    """Identity of a source for the reader: same page (and PDF page range) = same number."""
     pages = (chunk["page_from"], chunk["page_to"]) if chunk.get("page_from") else None
     return chunk["url"], pages
 
@@ -50,6 +51,7 @@ def renumber_citations(text: str, chunks: list[dict]) -> tuple[str, list[dict]]:
         mapping[n] = numbers[key]
 
     def rewrite_run(m: re.Match) -> str:
+        """Rewrite one run of citations such as [4][9] with the new numbers, without repeats."""
         new = [mapping.get(int(n), int(n)) for n in re.findall(r"\d+", m.group(0))]
         return "".join(f"[{n}]" for n in dict.fromkeys(new))  # [2][4] -> [2] when both are the same page
 

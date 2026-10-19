@@ -13,6 +13,7 @@ HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 
 
 def detect_lang(text: str) -> str:
+    """'id' or 'en' for a text (English when unsure)."""
     try:
         return "id" if detect(text[:2000]) == "id" else "en"
     except Exception:

@@ -17,11 +17,13 @@ def tree_text(rows: dict[str, object]) -> list[str]:
     out: list[str] = []
 
     def resolve(s: str) -> str | None:
+        """Text behind a "$ref", the string itself, or None for other references."""
         if s.startswith("$") and s[1:] in rows and isinstance(rows[s[1:]], str):
             return rows[s[1:]]
         return None if s.startswith("$") else s
 
     def walk(o, prefix: str = ""):
+        """Collect text from any node of the tree."""
         if isinstance(o, list):
             if len(o) == 4 and o[0] == "$" and isinstance(o[1], str) and isinstance(o[3], dict):
                 tag, props = o[1], o[3]  # React element: ["$", tag, key, props]
@@ -38,6 +40,7 @@ def tree_text(rows: dict[str, object]) -> list[str]:
                 out.append(prefix + s.strip())
 
     def walk_props(props: dict, prefix: str):
+        """Collect text from an element's props, skipping styling and metadata."""
         for k, v in props.items():
             if k in _SKIP_PROPS:
                 continue

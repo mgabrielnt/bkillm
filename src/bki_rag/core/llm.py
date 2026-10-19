@@ -18,11 +18,13 @@ R = TypeVar("R")
 
 @lru_cache(maxsize=1)
 def client() -> OpenAI:
+    """Shared OpenAI-compatible client (base URL and key come from config)."""
     return OpenAI(base_url=C.BASE_URL, max_retries=3, timeout=120)
 
 
 def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None,
          json_mode: bool = False, max_tokens: int | None = None) -> str:
+    """One chat completion; backs off and retries when the account rate limit is hit."""
     kwargs: dict = {"model": model, "messages": messages}
     effort = reasoning if reasoning is not None else (C.FAST_REASONING if model == C.FAST_MODEL else C.CHAT_REASONING)
     if effort:
@@ -43,6 +45,7 @@ def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None 
 
 
 def chat_json(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None) -> dict:
+    """Chat completion that must return JSON; {} if the model fails to after 3 tries."""
     for attempt in range(3):
         try:
             return json.loads(chat(messages, model=model, reasoning=reasoning, json_mode=True))
@@ -52,6 +55,7 @@ def chat_json(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | 
 
 
 def embed(texts: list[str], model: str = C.EMBED_MODEL, batch: int = 128) -> np.ndarray:
+    """Embed texts in batches; returns L2-normalised vectors, one row per text."""
     out: list[list[float]] = []
     for i in range(0, len(texts), batch):
         resp = client().embeddings.create(model=model, input=[t[:30000] for t in texts[i:i + batch]])
@@ -61,6 +65,7 @@ def embed(texts: list[str], model: str = C.EMBED_MODEL, batch: int = 128) -> np.
 
 
 def pmap(fn: Callable[[T], R], items: Iterable[T], workers: int = C.LLM_CONCURRENCY, desc: str = "") -> list[R]:
+    """Run fn over items in parallel threads, keeping the input order."""
     items = list(items)
     results: list[R] = [None] * len(items)  # type: ignore[list-item]
     done = 0
