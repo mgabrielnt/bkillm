@@ -13,13 +13,13 @@ _CITATION = re.compile(r"\[((?:(?:sources?|sumber)\s*)?\d+(?:\s*[,;]\s*(?:(?:sou
 _RUN = re.compile(r"(?:\[\d+\])+")
 
 
+# Model kecil kadang menulis [source 5; source 3] atau [1, 2]; ubah menjadi [5][3] / [1][2].
 def normalize_citations(text: str) -> str:
-    """Small models sometimes write [source 5; source 3] or [1, 2]; rewrite those as [5][3] / [1][2]."""
     return _CITATION.sub(lambda m: "".join(f"[{n}]" for n in re.findall(r"\d+", m.group(1))), text)
 
 
+# Judul yang mudah dibaca; judul umum ("BKI | Biro Klasifikasi ...") diganti nama dari URL.
 def display_title(chunk: dict) -> str:
-    """Readable title; generic page titles ("BKI | Biro Klasifikasi ...") are named after the URL path."""
     title = chunk["title"].strip()
     if title.startswith("BKI |") or title in ("BKI", "Biro Klasifikasi Indonesia"):
         last = urlparse(chunk["url"]).path.strip("/").split("/")[-1]
@@ -27,14 +27,14 @@ def display_title(chunk: dict) -> str:
     return title
 
 
+# Identitas sumber bagi pembaca: halaman sama (dan rentang halaman PDF sama) = nomor sama.
 def _source_key(chunk: dict) -> tuple:
-    """Identity of a source for the reader: same page (and PDF page range) = same number."""
     pages = (chunk["page_from"], chunk["page_to"]) if chunk.get("page_from") else None
     return chunk["url"], pages
 
 
+# Mengembalikan (jawaban dengan sitasi bernomor ulang 1..k, daftar sumber [{"n", "title", "url", "pages"}]).
 def renumber_citations(text: str, chunks: list[dict]) -> tuple[str, list[dict]]:
-    """Returns (answer with citations renumbered 1..k, sources [{"n", "title", "url", "pages"}])."""
     text = normalize_citations(text)
     mapping: dict[int, int] = {}
     numbers: dict[tuple, int] = {}
@@ -50,9 +50,9 @@ def renumber_citations(text: str, chunks: list[dict]) -> tuple[str, list[dict]]:
                             "pages": key[1]})
         mapping[n] = numbers[key]
 
+    # Tulis ulang satu deret sitasi seperti [4][9] dengan nomor baru, tanpa nomor ganda.
     def rewrite_run(m: re.Match) -> str:
-        """Rewrite one run of citations such as [4][9] with the new numbers, without repeats."""
         new = [mapping.get(int(n), int(n)) for n in re.findall(r"\d+", m.group(0))]
-        return "".join(f"[{n}]" for n in dict.fromkeys(new))  # [2][4] -> [2] when both are the same page
+        return "".join(f"[{n}]" for n in dict.fromkeys(new))  # [2][4] -> [2] jika keduanya halaman yang sama
 
     return _RUN.sub(rewrite_run, text), sources

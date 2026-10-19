@@ -18,12 +18,12 @@ from .pdfs import crawl_pdfs
 from .site import crawl_site_pages
 
 
+# Crawl semuanya ke data/raw/ dan tulis data/raw/manifest.jsonl.
 def run() -> None:
-    """Crawl everything into data/raw/ and write data/raw/manifest.jsonl."""
     fetcher = Fetcher()
     manifest: list[dict] = []
     crawl_cms(fetcher, manifest)
     crawl_site_pages(fetcher, manifest)
-    crawl_pdfs(fetcher, manifest)  # needs the CMS report lists and saved pages from the steps above
+    crawl_pdfs(fetcher, manifest)  # butuh daftar laporan CMS dan halaman tersimpan dari langkah di atas
     write_jsonl(C.MANIFEST, manifest)
     print(f"[crawl] manifest: {len(manifest)} rows {dict(Counter(m['status'] for m in manifest))}")

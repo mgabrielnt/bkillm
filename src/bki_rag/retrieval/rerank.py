@@ -10,8 +10,8 @@ from ..core.llm import chat_json
 from ..prompts import RERANK_PROMPT
 
 
+# Beri skor 0-10 untuk setiap kandidat dengan model cepat, lalu urutkan dari yang terbaik.
 def rerank(question: str, candidates: list[dict]) -> list[tuple[dict, float]]:
-    """Score candidates 0-10 with the fast model and sort them best first."""
     passages = "\n\n".join(
         f'<passage id="{i}" title="{c["title"]}" date="{(c.get("published_at") or "")[:10]}">\n'
         f'{c["text"][:1400]}\n</passage>' for i, c in enumerate(candidates))
@@ -23,6 +23,6 @@ def rerank(question: str, candidates: list[dict]) -> list[tuple[dict, float]]:
             s = float(scores.get(str(i), 0))
         except (TypeError, ValueError):
             s = 0.0
-        ranked.append((c, s - i * 1e-3))  # tie-break by fused rank
+        ranked.append((c, s - i * 1e-3))  # jika skor sama, pakai urutan hasil gabungan
     ranked.sort(key=lambda x: -x[1])
     return ranked

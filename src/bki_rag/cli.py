@@ -5,8 +5,8 @@ import argparse
 import sys
 
 
+# Baca perintah dari command line lalu jalankan (crawl, process, index, ask, chat, ...).
 def main() -> None:
-    """Parse the command line and run the chosen command (crawl, process, index, ask, chat, ...)."""
     sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(prog="bki_rag", description="RAG chatbot over bki.co.id")
     sub = p.add_subparsers(dest="cmd", required=True)

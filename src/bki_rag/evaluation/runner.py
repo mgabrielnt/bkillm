@@ -20,18 +20,18 @@ from .retrieval_eval import evaluate_retrieval
 
 PLAIN_INDEX = C.DATA / "index_plain"
 
-# Change one thing at a time.
+# Ubah satu hal per eksperimen.
 CONFIGS: dict[str, tuple[Path, RetrievalConfig]] = {
     "vector": (PLAIN_INDEX, RetrievalConfig("vector", bm25=False, rewrite=False)),
     "hybrid": (PLAIN_INDEX, RetrievalConfig("hybrid", bm25=True, rewrite=False)),
     "hybrid_ctx": (C.INDEX_DIR, RetrievalConfig("hybrid_ctx", bm25=True, rewrite=False)),
-    "full": (C.INDEX_DIR, RetrievalConfig("full", bm25=True, rewrite=True)),  # production default
+    "full": (C.INDEX_DIR, RetrievalConfig("full", bm25=True, rewrite=True)),  # default yang dipakai aplikasi
     "full_rerank": (C.INDEX_DIR, RetrievalConfig("full_rerank", bm25=True, rewrite=True, rerank=True)),
 }
 
 
+# Jawab setiap pertanyaan golden set lalu minta juri menilainya.
 def evaluate_answers(name: str, rag: RAG, golden: list[dict]) -> tuple[dict, list]:
-    """Answer every golden question and let the judge grade it."""
     results = pmap(lambda q: rag.answer(q["question"]), golden, workers=8, desc=f"answer[{name}]")
     grades = pmap(lambda qr: judge(*qr), list(zip(golden, results)), workers=8, desc="judge")
     details = [{"id": q["id"], "question": q["question"], "answerable": q["answerable"], "reference": q["answer"],
@@ -42,8 +42,8 @@ def evaluate_answers(name: str, rag: RAG, golden: list[dict]) -> tuple[dict, lis
     return summary, details
 
 
+# Evaluasi konfigurasi yang dipilih dan tulis ringkasannya ke data/eval/results/.
 def run(config: str = "full", answers: bool = False, limit: int | None = None) -> None:
-    """Evaluate the chosen configurations and write a summary to data/eval/results/."""
     golden = load_golden(limit)
     names = list(CONFIGS) if config == "all" else config.split(",")
     if any(CONFIGS[n][0] == PLAIN_INDEX for n in names) and not (PLAIN_INDEX / "meta.json").exists():

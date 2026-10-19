@@ -17,17 +17,16 @@ from ...core import config as C
 REJECTED_MARKER = b"The requested URL was rejected"
 
 
+# GET dengan jeda tetap antar request dan backoff bertingkat saat gagal.
 class Fetcher:
-    """GET with a fixed delay between requests and exponential backoff on failures."""
-
+    # Client HTTP dengan User-Agent jujur dan jeda antar request.
     def __init__(self, delay: float = C.REQUEST_DELAY_S):
-        """HTTP client with the honest User-Agent and the delay between requests."""
         self.delay = delay
         self._last = 0.0
         self.client = httpx.Client(headers={"User-Agent": C.USER_AGENT}, timeout=120, follow_redirects=True)
 
+    # GET sebuah URL dengan sopan; ulangi jika error jaringan, 5xx, atau ditolak WAF.
     def get(self, url: str, retries: int = 4) -> httpx.Response:
-        """GET a URL politely; retries on network errors, 5xx and WAF rejections."""
         resp = None
         for attempt in range(retries + 1):
             wait = self.delay - (time.time() - self._last)
@@ -47,17 +46,17 @@ class Fetcher:
         return resp
 
 
+# True jika WAF mengirim halaman 'Request Rejected' alih-alih konten.
 def is_rejected(content: bytes) -> bool:
-    """True when the WAF answered with its 'Request Rejected' page instead of content."""
     return REJECTED_MARKER in content[:400]
 
 
+# Nama file yang aman dari path sebuah URL.
 def slug(url: str) -> str:
-    """File-system friendly name for a URL path."""
     path = urlparse(url).path.strip("/") or "home"
     return re.sub(r"[^a-zA-Z0-9]+", "_", path)[:150]
 
 
+# Waktu UTC sekarang dalam format ISO, untuk manifest.
 def now() -> str:
-    """Current UTC time as ISO text, for the manifest."""
     return datetime.now(timezone.utc).isoformat(timespec="seconds")

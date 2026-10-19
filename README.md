@@ -18,8 +18,8 @@ bukan panjang pertanyaan/jawaban.
 
 ## Struktur folder
 
-Aturan: setiap file maksimal 100 baris, satu tugas per file, setiap fungsi punya komentar singkat
-(docstring), dan setiap folder punya `__init__.py` yang menjelaskan isinya.
+Aturan: setiap file maksimal 100 baris, satu tugas per file, setiap fungsi punya komentar singkat Bahasa Indonesia
+tepat di atas `def`/`class`, dan setiap folder punya `__init__.py` yang menjelaskan isinya.
 
 ```
 bki/

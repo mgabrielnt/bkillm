@@ -16,15 +16,15 @@ T = TypeVar("T")
 R = TypeVar("R")
 
 
+# Client OpenAI-compatible yang dipakai bersama (base URL dan key dari config).
 @lru_cache(maxsize=1)
 def client() -> OpenAI:
-    """Shared OpenAI-compatible client (base URL and key come from config)."""
     return OpenAI(base_url=C.BASE_URL, max_retries=3, timeout=120)
 
 
+# Satu panggilan chat ke model; menunggu lalu mencoba lagi jika kena batas laju akun.
 def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None,
          json_mode: bool = False, max_tokens: int | None = None) -> str:
-    """One chat completion; backs off and retries when the account rate limit is hit."""
     kwargs: dict = {"model": model, "messages": messages}
     effort = reasoning if reasoning is not None else (C.FAST_REASONING if model == C.FAST_MODEL else C.CHAT_REASONING)
     if effort:
@@ -33,7 +33,7 @@ def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None 
         kwargs["response_format"] = {"type": "json_object"}
     if max_tokens:
         kwargs["max_completion_tokens"] = max_tokens
-    for attempt in range(8):  # account TPM limits are tight for bulk jobs: back off and retry
+    for attempt in range(8):  # batas token/menit akun ketat untuk pekerjaan massal: tunggu lalu coba lagi
         try:
             resp = client().chat.completions.create(**kwargs)
             return resp.choices[0].message.content or ""
@@ -44,8 +44,8 @@ def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None 
     return ""
 
 
+# Panggilan chat yang harus menghasilkan JSON; {} jika gagal setelah 3 percobaan.
 def chat_json(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None) -> dict:
-    """Chat completion that must return JSON; {} if the model fails to after 3 tries."""
     for attempt in range(3):
         try:
             return json.loads(chat(messages, model=model, reasoning=reasoning, json_mode=True))
@@ -54,8 +54,8 @@ def chat_json(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | 
     return {}
 
 
+# Ubah teks menjadi vektor per batch; hasilnya dinormalisasi (panjang 1), satu baris per teks.
 def embed(texts: list[str], model: str = C.EMBED_MODEL, batch: int = 128) -> np.ndarray:
-    """Embed texts in batches; returns L2-normalised vectors, one row per text."""
     out: list[list[float]] = []
     for i in range(0, len(texts), batch):
         resp = client().embeddings.create(model=model, input=[t[:30000] for t in texts[i:i + batch]])
@@ -64,8 +64,8 @@ def embed(texts: list[str], model: str = C.EMBED_MODEL, batch: int = 128) -> np.
     return arr / np.linalg.norm(arr, axis=1, keepdims=True)
 
 
+# Jalankan fn untuk setiap item secara paralel (thread), urutan hasil sama dengan input.
 def pmap(fn: Callable[[T], R], items: Iterable[T], workers: int = C.LLM_CONCURRENCY, desc: str = "") -> list[R]:
-    """Run fn over items in parallel threads, keeping the input order."""
     items = list(items)
     results: list[R] = [None] * len(items)  # type: ignore[list-item]
     done = 0

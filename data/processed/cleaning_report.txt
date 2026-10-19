@@ -2,48 +2,48 @@ Cleaning stats: {'input': 432, 'exact_dups': 37, 'near_dups': 7, 'too_short': 91
 Corpus tokens: 812904
 
 == Most frequent blocks (removed if over threshold) ==
-  73  ## this page could not be found.
   73  i[00000,[],""]
+  73  ## this page could not be found.
   73  __page__
   40  our-services
   23  id
-  23  research
   23  rnd
+  23  research
   22  activities
   15  statutory
   14  classification
    8  material-component
    6  marine-services
-   5  ##
    5  ###
+   5  ##
    5  offshore-services
    4  ## pt biro klasifikasi indonesia (persero)
    4  ####
-   4  | batak | 00 | 0.00% | 0 | 0.00% |
-   4  | middle management | 00 | 00 | 00.00% | |
-   4  | stem (science, technology, engineering, and mathematics)- related functions | 00 | 000 | 00.00% | |
-   4  | total management | 00 | 000 | 00.00% | |
-   4  | junior management | 0 | 00 | 00.00% | |
    4  | management | top management | 0 | 00 | 0.00% |
    4  | total | 000 | 000% | 00 | 000% |
    4  | islam | 000 | 00.00% | 00 | 00.00% |
    4  | betawi | 000 | 00.00% | 0 | 0.00% |
+   4  | junior management | 0 | 00 | 00.00% | |
    4  | minangkabau | 00 | 0.00% | 0 | 0.00% |
+   4  | stem (science, technology, engineering, and mathematics)- related functions | 00 | 000 | 00.00% | |
+   4  | middle management | 00 | 00 | 00.00% | |
+   4  | batak | 00 | 0.00% | 0 | 0.00% |
+   4  | total management | 00 | 000 | 00.00% | |
    4  | **keterangan** | **0000** | **0000** | **0000** | **0000** | |---|---|---|---|---|
    4  esgrc
    4  manufacturers-approval
-   3  📌 informasi resmi hanya diumumkan melalui kanal bki. undangan ke tahapan seleksi selanjutnya akan kami kirimkan melalui email bki: rec@bki.co.id
    3  bagi yang dinyatakan lolos, silakan mempersiapkan diri untuk tahapan seleksi selanjutnya.
-   3  bagi yang belum dinyatakan lolos, kami mengucapkan terima kasih atas partisipasinya dan mendorong untuk dapat mencoba kembali pada kesempatan berikutnya.
    3  kami mengucapkan terima kasih atas partisipasi seluruh peserta.
+   3  📌 informasi resmi hanya diumumkan melalui kanal bki. undangan ke tahapan seleksi selanjutnya akan kami kirimkan melalui email bki: rec@bki.co.id
+   3  bagi yang belum dinyatakan lolos, kami mengucapkan terima kasih atas partisipasinya dan mendorong untuk dapat mencoba kembali pada kesempatan berikutnya.
    3  tetap pantau website dan media sosial kami untuk update berikutnya!
    3  international-safety-management
    2  ![dsc00000.jpg](https://cms.bki.co.id/uploads/dsc_00000_0f0ee00000.jpg) ![dsc00000.jpg](https://cms.bki.co.id/uploads/dsc_00000_a0eb0b0b0f.jpg)
    2  ![img_0000.jpg](https://cms.bki.co.id/uploads/img_0000_c00e0efd00.jpg)
    2  banjarmasin, 00 desember 0000 — direktur utama pt biro klasifikasi indonesia (persero) atau bki, r. benny susanto, melakukan kunjungan kerja ke pelabuhan trisak
    2  ![whatsapp image 0000-00-00 at 00.00.00 (0).jpeg](https://cms.bki.co.id/uploads/whats_app_image_0000_00_00_at_00_00_00_0_00000000bf.jpeg) ![whatsapp image 0000-
-   2  ![narasi (0).jpg](https://cms.bki.co.id/uploads/narasi_0_00ab0cb00d.jpg)
    2  pengumuman seleksi tahap v (seleksi interview user) rekrutmen engineer pt bki (persero)
+   2  ![narasi (0).jpg](https://cms.bki.co.id/uploads/narasi_0_00ab0cb00d.jpg)
    2  ![whatsapp image 0000-00-00 at 00.00.00 (0).jpeg](https://cms.bki.co.id/uploads/whats_app_image_0000_00_00_at_00_00_00_0_0d00000ef0.jpeg)
    2  we would like to thank all participants for their interest and effort.
    2  stay tuned to our website and social media channels for further updates!

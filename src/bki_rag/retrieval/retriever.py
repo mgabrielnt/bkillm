@@ -10,17 +10,18 @@ from .query import detect_lang, rewrite_query
 from .rerank import rerank
 
 
+# Pengaturan pencarian: pakai BM25, rewrite pertanyaan, rerank, dan jumlah chunk (top_k).
 @dataclass(frozen=True)
 class RetrievalConfig:
     name: str = "full"
     bm25: bool = True
     rewrite: bool = True
-    rerank: bool = False  # see rerank.py for why this is opt-in
+    rerank: bool = False  # lihat rerank.py: mengapa ini tidak aktif secara default
     top_k: int = C.TOP_K
 
 
+# Gabungkan beberapa daftar peringkat: item yang tinggi di banyak daftar naik ke atas.
 def reciprocal_rank_fusion(ranked_lists: list[list[tuple[int, float]]], k: int = C.RRF_K) -> list[int]:
-    """Merge ranked lists: items ranked high in many lists come first."""
     fused: dict[int, float] = {}
     for lst in ranked_lists:
         for rank, (idx, _) in enumerate(lst):
@@ -28,14 +29,16 @@ def reciprocal_rank_fusion(ranked_lists: list[list[tuple[int, float]]], k: int =
     return sorted(fused, key=lambda i: -fused[i])
 
 
+# Pencari hybrid: vektor + BM25 untuk setiap versi pertanyaan, digabung dengan RRF.
 class Retriever:
+    # Cari di index yang diberikan (default: data/index).
     def __init__(self, index: Index | None = None):
-        """Search the given index (default: data/index)."""
         self.index = index or Index()
 
+    # Mengembalikan {"query": hasil rewrite, "chunks": top_k chunk untuk jawaban, "ranking": urutan lengkap
+    # untuk metrik}.
     def search(self, question: str, history: list[dict] | None = None,
                cfg: RetrievalConfig = RetrievalConfig()) -> dict:
-        """Returns {"query": rewrite info, "chunks": top_k chunks for the answer, "ranking": full order for metrics}."""
         ix = self.index
         q = rewrite_query(question, history) if cfg.rewrite else {"standalone": question, "lang": detect_lang(question)}
         variants = list(dict.fromkeys(v for v in (q.get("standalone"), q.get("en"), q.get("id")) if v))

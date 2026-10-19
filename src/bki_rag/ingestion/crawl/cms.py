@@ -11,7 +11,7 @@ from ...core import config as C
 from ...core.utils import sha256
 from .fetcher import Fetcher, now
 
-CMS_COLLECTIONS = [  # (collection, locales, extra query)
+CMS_COLLECTIONS = [  # (koleksi, bahasa, query tambahan)
     ("newss", ["en", "id"], "populate=*"),
     ("articles", ["en", "id"], "populate=*"),
     ("events", ["en", "id"], "populate=*"),
@@ -22,8 +22,8 @@ CMS_COLLECTIONS = [  # (collection, locales, extra query)
 ]
 
 
+# Ambil semua item satu koleksi CMS, mengikuti halaman-halaman (pagination) Strapi.
 def fetch_collection(fetcher: Fetcher, name: str, query: str, locale: str | None) -> list[dict]:
-    """All items of one collection, following Strapi pagination."""
     items, page = [], 1
     while True:
         url = f"{C.CMS_API}/{name}?{query}&pagination[pageSize]=100&pagination[page]={page}"
@@ -36,8 +36,8 @@ def fetch_collection(fetcher: Fetcher, name: str, query: str, locale: str | None
         page += 1
 
 
+# Unduh setiap koleksi CMS (per bahasa) ke data/raw/cms/.
 def crawl_cms(fetcher: Fetcher, manifest: list[dict]) -> None:
-    """Download every CMS collection (per language) into data/raw/cms/."""
     C.RAW_CMS.mkdir(parents=True, exist_ok=True)
     for name, locales, query in CMS_COLLECTIONS:
         for loc in locales:

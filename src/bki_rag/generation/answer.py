@@ -13,17 +13,16 @@ from .sources import build_context
 LANG_NAMES = {"id": "Indonesian", "en": "English"}
 
 
+# Pipeline RAG untuk satu pertanyaan: cari sumber, tanya model, kembalikan jawaban + sumber.
 class RAG:
+    # Pakai retriever yang diberikan (default: data/index) dan konfigurasi pencariannya.
     def __init__(self, retriever: Retriever | None = None, cfg: RetrievalConfig = RetrievalConfig()):
-        """Use the given retriever (default: data/index) and retrieval configuration."""
         self.retriever = retriever or Retriever()
         self.cfg = cfg
 
+    # Mengembalikan {"answer", "sources", "chunks", "query", "ranking", "timing"}. "answer" memakai sitasi
+    # [1]..[k] dan "sources" berisi nomor yang sama persis.
     def answer(self, question: str, history: list[dict] | None = None) -> dict:
-        """Returns {"answer", "sources", "chunks", "query", "ranking", "timing"}.
-
-        "answer" cites [1]..[k] and "sources" lists exactly those numbers.
-        """
         t0 = time.time()
         found = self.retriever.search(question, history, self.cfg)
         t1 = time.time()

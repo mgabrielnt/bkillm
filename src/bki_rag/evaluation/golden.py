@@ -13,12 +13,12 @@ from ..core.llm import chat_json, pmap
 from ..core.utils import read_jsonl, write_jsonl
 from ..prompts import GOLDEN_PROMPT, GOLDEN_STYLES
 
-STRATA = {  # doc_type -> number of questions
+STRATA = {  # doc_type -> jumlah pertanyaan
     "service": 20, "company": 10, "esg": 14, "news": 16, "announcement": 4, "annual_report": 18,
     "sustainability_report": 10, "article": 4, "research": 2, "job": 2, "policy": 2, "event": 1,
 }
 
-# Must be refused: plausible-but-absent BKI facts and off-topic requests.
+# Harus ditolak: fakta BKI yang terdengar wajar tapi tidak ada, dan permintaan di luar topik.
 UNANSWERABLE = [
     "Berapa tarif survei klasifikasi untuk kapal tanker 5000 GT di BKI?",
     "Siapa nama direktur utama BKI pada tahun 1985?",
@@ -44,8 +44,8 @@ UNANSWERABLE = [
 _ID_WORDS = ("berapa", "apakah", "siapa", "bagaimana", "kapan", "tuliskan")
 
 
+# Buat golden test set dari chunk acak per tipe dokumen, simpan ke data/eval/golden.jsonl.
 def build_golden() -> None:
-    """Draft the golden test set from stratified random chunks into data/eval/golden.jsonl."""
     rng = random.Random(42)
     by_type: dict[str, list[dict]] = defaultdict(list)
     for c in read_jsonl(C.CHUNKS_FILE):
@@ -54,12 +54,12 @@ def build_golden() -> None:
     picks = []
     for t, k in STRATA.items():
         pool = by_type.get(t, [])
-        picks += rng.sample(pool, min(len(pool), k + 4))  # spare picks for unsuitable passages
+        picks += rng.sample(pool, min(len(pool), k + 4))  # cadangan untuk potongan yang tidak cocok
     tasks = [(c, "Indonesian" if rng.random() < 0.5 else "English", "short" if rng.random() < 0.6 else "detailed")
              for c in picks]
 
+    # Minta model juri membuat satu pertanyaan + jawaban acuan dari chunk ini.
     def draft(task):
-        """Ask the judge model for one question + reference answer about this chunk."""
         c, qlang, style = task
         return chat_json([{"role": "user", "content": GOLDEN_PROMPT.format(
             title=c["title"], doc_type=c["doc_type"], date=(c.get("published_at") or "")[:10],
@@ -83,8 +83,8 @@ def build_golden() -> None:
           f"{len(UNANSWERABLE)} unanswerable)")
 
 
+# Golden set lengkap, atau sampel yang tersebar rata (tetap berisi pertanyaan jebakan).
 def load_golden(limit: int | None = None) -> list[dict]:
-    """The golden set, or an evenly spread sample of it (keeps the answerable/unanswerable mix)."""
     rows = list(read_jsonl(C.GOLDEN_FILE))
     if not limit or limit >= len(rows):
         return rows

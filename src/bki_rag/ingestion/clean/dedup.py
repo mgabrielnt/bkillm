@@ -13,8 +13,8 @@ from ...core.utils import sha256
 from .filters import norm_block
 
 
+# Tanda tangan MinHash sebuah teks dari potongan 5 kata.
 def _minhash(text: str) -> MinHash:
-    """MinHash signature of a text from 5-word shingles."""
     words = re.findall(r"\w+", text.lower())
     m = MinHash(num_perm=128)
     for i in range(max(1, len(words) - 4)):
@@ -22,14 +22,14 @@ def _minhash(text: str) -> MinHash:
     return m
 
 
+# Simpan URL duplikat sebagai alias dari dokumen yang dipertahankan.
 def _add_alias(keep: dict, dup: dict) -> None:
-    """Remember a duplicate's URL as an alias of the kept document."""
     if dup["url"] != keep["url"]:
         keep.setdefault("aliases", []).append(dup["url"])
 
 
+# Mengembalikan (dokumen yang dipertahankan, jumlah duplikat persis, jumlah hampir-duplikat).
 def dedup(docs: list[dict]) -> tuple[list[dict], int, int]:
-    """Returns (kept docs, number of exact duplicates, number of near-duplicates)."""
     by_hash: dict[str, dict] = {}
     exact = 0
     for d in docs:
@@ -42,7 +42,7 @@ def dedup(docs: list[dict]) -> tuple[list[dict], int, int]:
     lsh = MinHashLSH(threshold=0.8, num_perm=128)
     kept: list[dict] = []
     near = 0
-    for d in sorted(by_hash.values(), key=lambda x: -len(x["full_text"])):  # keep the longest version
+    for d in sorted(by_hash.values(), key=lambda x: -len(x["full_text"])):  # pertahankan versi terpanjang
         mh = _minhash(d["full_text"])
         hits = lsh.query(mh)
         if hits:

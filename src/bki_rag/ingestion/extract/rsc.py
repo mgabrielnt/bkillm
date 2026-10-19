@@ -9,8 +9,8 @@ import json
 import re
 
 
+# Uraikan baris `self.__next_f.push([1, "..."])` menjadi {row_id: json | teks}.
 def parse_flight(html: str) -> dict[str, object]:
-    """Decode `self.__next_f.push([1, "..."])` rows into {row_id: json | text}."""
     pieces = []
     for raw in re.findall(r"self\.__next_f\.push\((\[.*?\])\)</script>", html, re.S):
         try:
@@ -29,7 +29,7 @@ def parse_flight(html: str) -> dict[str, object]:
             i = n if nl < 0 else nl + 1
             continue
         rid, j = m.group(1).decode(), i + m.end()
-        if data[j:j + 1] == b"T":  # text row: T<hex byte length>,<text>
+        if data[j:j + 1] == b"T":  # baris teks: T<panjang byte dalam hex>,<teks>
             comma = data.find(b",", j)
             size = int(data[j + 1:comma], 16)
             rows[rid] = data[comma + 1:comma + 1 + size].decode("utf-8", "replace")
@@ -46,8 +46,8 @@ def parse_flight(html: str) -> dict[str, object]:
     return rows
 
 
+# Kamus i18n bahasa Inggris di dalam payload ({"translations": {"en": {"common": {...}}}}).
 def find_translations(rows: dict[str, object]) -> dict | None:
-    """The English i18n dictionary inside the payload ({"translations": {"en": {"common": {...}}}})."""
     stack = list(rows.values())
     while stack:
         o = stack.pop()
@@ -61,8 +61,8 @@ def find_translations(rows: dict[str, object]) -> dict | None:
     return None
 
 
+# Ganti referensi seperti "$18" dengan teks yang ditunjuknya (jika ada di halaman ini).
 def resolve_refs(o, rows: dict[str, object]):
-    """Replace "$18"-style references with the text row they point to (when this page has it)."""
     if isinstance(o, dict):
         return {k: resolve_refs(v, rows) for k, v in o.items()}
     if isinstance(o, str) and o.startswith("$") and isinstance(rows.get(o[1:]), str):
@@ -70,8 +70,8 @@ def resolve_refs(o, rows: dict[str, object]):
     return o
 
 
+# Gabungkan dua salinan kamus, utamakan teks asli dibanding referensi "$ref" yang belum terselesaikan.
 def merge_resolved(base, new):
-    """Deep-merge two copies of the dictionary, preferring real text over unresolved "$ref" strings."""
     if base is None:
         return new
     if isinstance(base, dict) and isinstance(new, dict):

@@ -12,8 +12,9 @@ DISCLAIMER = ("Jawaban disusun otomatis dari situs bki.co.id dan laporan resmi B
               "Ini bukan kanal resmi PT Biro Klasifikasi Indonesia; untuk keperluan resmi hubungi BKI langsung.")
 
 
+# Hentikan halaman sampai APP_PASSWORD yang benar dimasukkan (tidak berbuat apa-apa jika kata sandi tidak
+# diatur).
 def password_gate() -> None:
-    """Stops the page until the right APP_PASSWORD is entered (no-op when no password is set)."""
     if not C.APP_PASSWORD or st.session_state.get("authed"):
         return
     pw = st.text_input("Kata sandi", type="password")
@@ -25,11 +26,9 @@ def password_gate() -> None:
     st.stop()
 
 
+# Link sumber berlabel [n], sama persis dengan sitasi di jawaban. Ditulis sebagai baris "[n] link", bukan
+# daftar bernomor Markdown, karena Markdown akan menomori ulang daftarnya.
 def source_links(sources: list[dict], lang: str) -> str:
-    """Links labelled [n] exactly like the citations in the answer.
-
-    Written as "[n] link" lines, not a Markdown numbered list, because Markdown would renumber the list.
-    """
     label, page = ("Sources", "p.") if lang == "en" else ("Sumber", "hal.")
     lines = []
     for s in sources:
@@ -40,8 +39,8 @@ def source_links(sources: list[dict], lang: str) -> str:
     return f"**{label}:**  \n" + "  \n".join(lines)
 
 
+# Satu gelembung chat; jawaban model ditampilkan sebagai Markdown biasa (tanpa HTML).
 def show_message(msg: dict) -> None:
-    """One chat bubble; model output is plain Markdown (Streamlit does not render HTML here)."""
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg.get("sources"):

@@ -16,8 +16,8 @@ from .filters import frequency_filter, line_filter, pdf_header_footer_filter
 MIN_WORDS = 50
 
 
+# Mengembalikan (dokumen bersih dengan field "full_text", statistik, blok paling sering untuk dicek).
 def clean_documents(docs: list[dict]) -> tuple[list[dict], dict, list[tuple[str, int]]]:
-    """Returns (clean docs with a "full_text" field, stats, most frequent blocks for review)."""
     stats = {"input": len(docs)}
     md_docs = [d for d in docs if "pages" not in d]
     pdf_docs = [d for d in docs if "pages" in d]

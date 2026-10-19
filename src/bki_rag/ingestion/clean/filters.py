@@ -17,27 +17,25 @@ BOILERPLATE_LINE = re.compile(
 )
 
 
+# Kunci pembanding: huruf kecil, spasi tunggal, angka diganti 0.
 def norm_block(b: str) -> str:
-    """Comparison key: lowercase, single spaces, digits replaced by 0."""
     return re.sub(r"\d", "0", re.sub(r"\s+", " ", b.lower())).strip()
 
 
+# Pecah teks menjadi blok (baris kosong, butir daftar, judul, tabel).
 def blocks(text: str) -> list[str]:
-    """Split text into paragraph-like blocks (blank lines, list items, headings, tables)."""
     return [b for b in re.split(r"\n\s*\n|\n(?=[-*#|] )", text) if b.strip()]
 
 
+# Buang baris seperti "Read more", "Bagikan", hak cipta, dan nomor halaman.
 def line_filter(text: str) -> str:
-    """Drop lines such as "Read more", "Bagikan", copyright notices and bare page numbers."""
     return "\n".join(line for line in text.split("\n") if not BOILERPLATE_LINE.match(line.strip()))
 
 
+# Buang blok yang muncul di > ratio dokumen (atau di >= min_docs dokumen dan pendek) dalam tiap grup `key`.
+# Mengembalikan dokumen dan blok paling sering untuk laporan cek manual.
 def frequency_filter(docs: list[dict], key: str, ratio: float = 0.2, min_docs: int = 5,
                      short_words: int = 15) -> tuple[list[dict], list[tuple[str, int]]]:
-    """Drop blocks found in > ratio of the docs (or in >= min_docs docs and short) within each `key` group.
-
-    Returns the docs and the most frequent blocks, for the manual-review report.
-    """
     groups: dict[str, list[dict]] = defaultdict(list)
     for d in docs:
         groups[d[key]].append(d)
@@ -48,7 +46,7 @@ def frequency_filter(docs: list[dict], key: str, ratio: float = 0.2, min_docs: i
             continue
         df = Counter()
         for d in group_docs:
-            df.update({norm_block(b) for b in blocks(d["text"])[1:]})  # first block = title, never counted
+            df.update({norm_block(b) for b in blocks(d["text"])[1:]})  # blok pertama = judul, tidak dihitung
         bad = {b for b, c in df.items()
                if (c / n > ratio or (c >= min_docs and len(b.split()) < short_words)) and c >= 3}
         report += df.most_common(60)
@@ -59,8 +57,8 @@ def frequency_filter(docs: list[dict], key: str, ratio: float = 0.2, min_docs: i
     return docs, report
 
 
+# Buang baris pendek yang berulang di banyak halaman satu PDF (header/footer).
 def pdf_header_footer_filter(pages: list[dict], ratio: float = 0.3) -> list[dict]:
-    """Remove short lines that repeat on many pages of one PDF (running headers/footers)."""
     df = Counter()
     for p in pages:
         df.update({norm_block(line) for line in p["text"].split("\n") if line.strip()})

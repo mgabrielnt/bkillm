@@ -16,14 +16,14 @@ from .views import DISCLAIMER, TITLE, password_gate, show_message
 log = logging.getLogger("bki_rag.web")
 
 
+# Dimuat sekali per server dan dipakai bersama semua pengunjung (index hanya dibaca).
 @st.cache_resource(show_spinner="Memuat data...")
 def _load() -> tuple[RAG, DailyLimiter]:
-    """Loaded once per server and shared by all visitors (the index is read-only)."""
     return RAG(), DailyLimiter(C.USAGE_FILE, C.DAILY_QUESTION_LIMIT)
 
 
+# Tampilkan pertanyaan, jawab, lalu simpan keduanya di riwayat sesi.
 def _ask(rag: RAG, question: str) -> None:
-    """Show the question, answer it and keep both in the session history."""
     ss = st.session_state
     ss.asked += 1
     ss.last_ask = time.time()
@@ -42,8 +42,8 @@ def _ask(rag: RAG, question: str) -> None:
     st.rerun()
 
 
+# Tampilkan halaman chat: judul, kata sandi, riwayat, kotak pertanyaan, dan batas pemakaian.
 def main() -> None:
-    """Render the chat page: header, password gate, history, question box and limits."""
     st.title(TITLE)
     st.caption(DISCLAIMER)
     password_gate()

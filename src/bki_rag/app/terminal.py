@@ -7,8 +7,8 @@ from ..generation.answer import RAG
 HELP = "Perintah: /reset (hapus riwayat), /debug (tampilkan chunk), /exit (keluar)"
 
 
+# Cetak satu jawaban beserta daftar sumbernya (dan chunk yang diambil jika mode debug).
 def _print_result(res: dict, debug: bool) -> None:
-    """Print one answer with its numbered sources (and the retrieved chunks in debug mode)."""
     print(f"\nBot: {res['answer']}\n")
     if res["sources"]:
         english = res["query"].get("lang") == "en"
@@ -25,13 +25,13 @@ def _print_result(res: dict, debug: bool) -> None:
     print(f"[{res['timing']['total_s']}s, retrieval {res['timing']['retrieval_s']}s]\n")
 
 
+# Jawab satu pertanyaan dari command line (perintah `ask`).
 def ask_once(question: str, debug: bool = False) -> None:
-    """Answer a single question from the command line (`ask`)."""
     _print_result(RAG().answer(question), debug)
 
 
+# Loop chat interaktif dengan riwayat dan perintah /reset, /debug, /exit (perintah `chat`).
 def repl(debug: bool = False) -> None:
-    """Interactive chat loop with history and /reset, /debug, /exit (`chat`)."""
     rag = RAG()
     history: list[dict] = []
     print(f"BKI RAG chatbot ({C.CHAT_MODEL} + {rag.retriever.index.meta['embed_model']}, "
@@ -56,7 +56,7 @@ def repl(debug: bool = False) -> None:
             continue
         try:
             res = rag.answer(q, history)
-        except Exception as e:  # keep the session alive on API errors
+        except Exception as e:  # sesi tetap berjalan walau API error
             print(f"[error] {e}\n")
             continue
         _print_result(res, debug)

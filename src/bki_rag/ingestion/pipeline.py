@@ -11,14 +11,14 @@ from .clean import clean_documents
 from .extract import cms_docs, page_docs, pdf_docs
 from ..core.utils import count_tokens, sha256, write_jsonl
 
-# Listing / media pages: their teasers duplicate CMS items, so the RSC-tree text is not indexed.
+# Halaman daftar / media: cuplikannya sama dengan item CMS, jadi teks halamannya tidak di-index.
 LISTING_PATHS = {"/", "/news", "/articles", "/events", "/photos", "/podcasts", "/annual-report",
                  "/sustainability-report", "/research/rnd/technical-publication", "/research/rnd/activities",
                  "/opportunities", "/our-services"}
 
 
+# Ekstrak, bersihkan, dan potong dokumen; tulis data/processed/ dan laporan untuk dicek.
 def run() -> None:
-    """Extract, clean and chunk; write data/processed/ and a review report."""
     docs = cms_docs()
     site = page_docs()
     docs += [d for d in site if not (d["source"] == "site-tree" and (urlparse(d["url"]).path or "/") in LISTING_PATHS)]
@@ -41,7 +41,7 @@ def run() -> None:
     print(f"[process] chunks by type: {dict(Counter(c['doc_type'] for c in chunks))}")
     print(f"[process] chunks by lang: {dict(Counter(c['lang'] for c in chunks))}")
 
-    # Manual-review report: most frequent blocks + random chunk samples.
+    # Laporan cek manual: blok paling sering + contoh chunk acak.
     with open(C.CLEANING_REPORT, "w", encoding="utf-8") as f:
         f.write(f"Cleaning stats: {stats}\nCorpus tokens: {total_tokens}\n\n== Most frequent blocks (removed if over threshold) ==\n")
         for block, c in freq_report[:50]:

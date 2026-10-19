@@ -22,8 +22,8 @@ SKIP_NAMESPACES = {"nav", "common", "footer", "header", "auth", "login", "form",
                    "search", "pagination", "breadcrumb", "chatbot", "certificate_verification"}
 
 
+# Dokumen untuk semua halaman statis: namespace kamus (EN + ID) dan teks halaman.
 def page_docs() -> list[dict]:
-    """Documents for all static pages: dictionary namespaces (EN + ID) and page text."""
     site = [m for m in read_jsonl(C.MANIFEST)
             if m["source"] == "site" and m["status"] == "ok" and m["raw_path"].endswith(".html")]
     site_paths = [urlparse(m["url"]).path or "/" for m in site]
@@ -32,8 +32,8 @@ def page_docs() -> list[dict]:
     for m in site:
         html = (C.ROOT / m["raw_path"]).read_text(encoding="utf-8", errors="replace")
         rows = parse_flight(html)
-        # Long strings (e.g. director bios) are "$ref"s to text rows of the page that renders them, so
-        # resolve every page's copy of the dictionary and keep the first resolved value of each key.
+        # Teks panjang (mis. biografi direksi) berupa "$ref" ke baris teks di halaman yang menampilkannya,
+        # jadi selesaikan kamus dari setiap halaman dan simpan nilai pertama yang berhasil per key.
         en_dict = merge_resolved(en_dict, resolve_refs(find_translations(rows), rows))
         title = re.search(r"<title>(.*?)</title>", html)
         docs.append({"url": m["url"], "title": (title.group(1) if title else m["url"]).replace(" | BKI", "").strip(),
@@ -42,7 +42,7 @@ def page_docs() -> list[dict]:
     dicts = {"en": en_dict or {}}
     id_path = C.RAW_SITE / "locale_id.json"
     if id_path.exists():
-        dicts["id"] = json.loads(id_path.read_text(encoding="utf-8"))  # the file is the "common" namespace
+        dicts["id"] = json.loads(id_path.read_text(encoding="utf-8"))  # file ini adalah namespace "common"
     for lang, d in dicts.items():
         for ns, val in d.items():
             if ns not in SKIP_NAMESPACES and isinstance(val, dict):
@@ -50,10 +50,10 @@ def page_docs() -> list[dict]:
     return docs
 
 
+# Satu dokumen per namespace, atau per sub-halaman untuk namespace yang sangat besar.
 def _namespace_docs(ns: str, val: dict, lang: str, site_paths: list[str]) -> list[dict]:
-    # A namespace like "statutory" holds a dozen sub-pages (solas, marpol, loadLine, ...): give each big
-    # child its own document and URL so citations point at the right page.
-    """One document per namespace, or per sub-page for very large namespaces."""
+    # Namespace seperti "statutory" berisi belasan sub-halaman (solas, marpol, loadLine, ...): beri
+    # setiap sub-halaman besar dokumen dan URL sendiri agar sitasi menunjuk halaman yang benar.
     parts = {ns: val}
     if word_count(val) > 1200:
         children = {k: v for k, v in val.items() if isinstance(v, dict) and word_count(v) >= 100}
@@ -71,8 +71,8 @@ def _namespace_docs(ns: str, val: dict, lang: str, site_paths: list[str]) -> lis
     return docs
 
 
+# Jumlah kata di dalam nilai kamus (termasuk yang bersarang).
 def word_count(o) -> int:
-    """Total words in a (nested) dictionary value."""
     if isinstance(o, dict):
         return sum(word_count(v) for v in o.values())
     if isinstance(o, list):
@@ -80,8 +80,8 @@ def word_count(o) -> int:
     return len(str(o).split())
 
 
+# Judul dokumen namespace (dari key judulnya, atau dari nama namespace).
 def namespace_title(ns: str, val: dict) -> str:
-    """Title of a namespace document (its title key, or the namespace name)."""
     for k in ("title", "heading", "pageTitle", "hero_title", "heroTitle"):
         if isinstance(val.get(k), str) and len(val[k].split()) <= 12:
             return val[k].strip()

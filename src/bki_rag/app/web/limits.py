@@ -15,27 +15,26 @@ from pathlib import Path
 from ...core import config as C
 
 
+# Menghitung pertanyaan per hari di file JSON kecil; aman dipakai banyak thread dalam satu server.
 class DailyLimiter:
-    """Counts questions per calendar day in a small JSON file. Thread-safe within one server process."""
-
+    # Izinkan maksimal `limit` pertanyaan per hari, dihitung di file JSON `path`.
     def __init__(self, path: Path, limit: int):
-        """Allow at most `limit` questions per day, counted in the JSON file at `path`."""
         self.path, self.limit = path, limit
         self._lock = threading.Lock()
 
+    # Isi file penghitung ({} jika file belum ada atau rusak).
     def _read(self) -> dict:
-        """Counter file contents ({} when missing or unreadable)."""
         try:
             return json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return {}
 
+    # Jumlah pertanyaan yang sudah diajukan hari ini.
     def used_today(self) -> int:
-        """Number of questions already asked today."""
         return int(self._read().get(date.today().isoformat(), 0))
 
+    # Hitung satu pertanyaan; False jika batas hari ini sudah tercapai.
     def try_consume(self) -> bool:
-        """Count one question; False when today's limit is already reached."""
         with self._lock:
             today = date.today().isoformat()
             used = int(self._read().get(today, 0))
@@ -46,8 +45,8 @@ class DailyLimiter:
             return True
 
 
+# Pesan peringatan jika pengunjung harus menunggu atau berhenti; None jika boleh bertanya.
 def session_block(asked: int, last_ask: float) -> str | None:
-    """Warning to show when this visitor must wait or stop, otherwise None."""
     if asked >= C.SESSION_QUESTION_LIMIT:
         return "Batas pertanyaan untuk sesi ini sudah tercapai. Silakan coba lagi nanti."
     if time.time() - last_ask < C.MIN_SECONDS_BETWEEN_QUESTIONS:

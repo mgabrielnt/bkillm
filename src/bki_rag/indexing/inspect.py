@@ -18,8 +18,8 @@ from .export import to_csv, to_excel
 from .store import Index
 
 
+# Nomor baris matriks untuk sebuah chunk id (baris 0 jika id tidak diberikan).
 def _row(ix: Index, chunk_id: str | None) -> int:
-    """Matrix row of a chunk id (row 0 when no id is given)."""
     if not chunk_id:
         return 0
     for i, c in enumerate(ix.chunks):
@@ -28,8 +28,8 @@ def _row(ix: Index, chunk_id: str | None) -> int:
     raise SystemExit(f"chunk id not found: {chunk_id}")
 
 
+# Tampilkan k chunk yang vektornya paling mirip (cosine similarity tertinggi) dengan `vec`.
 def _print_neighbours(ix: Index, vec: np.ndarray, k: int, skip: int | None = None) -> None:
-    """The k chunks whose vectors are closest (highest cosine similarity) to `vec`."""
     scores = ix.emb @ vec
     shown = 0
     for i in np.argsort(-scores):
@@ -42,9 +42,9 @@ def _print_neighbours(ix: Index, vec: np.ndarray, k: int, skip: int | None = Non
             break
 
 
+# Tampilkan info index, vektor satu chunk, dan chunk termirip; opsional ekspor ke CSV / Excel.
 def show(chunk_id: str | None = None, query: str | None = None, dims: int = 8, k: int = 5,
          export: str | None = None, rows: int = 20, excel: str | None = None) -> None:
-    """Print index facts, one chunk's vector and its nearest chunks; optionally export to CSV / Excel."""
     ix = Index()
     print(f"embeddings.npy : {ix.emb.shape[0]} rows x {ix.emb.shape[1]} dims, {ix.emb.dtype}, "
           f"model {ix.meta['embed_model']}, contextual={ix.meta['contextual']}")

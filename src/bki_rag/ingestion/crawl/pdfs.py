@@ -15,8 +15,8 @@ from .fetcher import Fetcher, now
 _PDF_LINK = re.compile(r'(?<=["(])(/[\w\-./%]{1,200}\.pdf)')
 
 
+# Daftar PDF dari koleksi laporan di CMS (CMS harus di-crawl lebih dulu).
 def report_files(collection: str, years: list[int] | None, limit: int | None) -> list[dict]:
-    """PDF targets listed in a CMS report collection (crawl the CMS first)."""
     items = json.loads((C.RAW_CMS / f"{collection}_all.json").read_text(encoding="utf-8"))
     out = []
     for it in items:
@@ -31,8 +31,8 @@ def report_files(collection: str, years: list[int] | None, limit: int | None) ->
     return out[:limit] if limit else out
 
 
+# PDF yang ditautkan dari halaman statis yang tersimpan (mis. dokumen kebijakan).
 def linked_pdfs(known: set[str]) -> list[dict]:
-    """PDFs linked from the saved static pages (e.g. policy documents)."""
     out = []
     for html in C.RAW_SITE.glob("*.html"):
         for href in _PDF_LINK.findall(html.read_text(encoding="utf-8", errors="ignore")):
@@ -43,8 +43,8 @@ def linked_pdfs(known: set[str]) -> list[dict]:
     return out
 
 
+# Unduh PDF laporan yang dipilih (sekali per URL) ke data/raw/pdf/.
 def crawl_pdfs(fetcher: Fetcher, manifest: list[dict]) -> None:
-    """Download the selected report PDFs (once per URL) into data/raw/pdf/."""
     C.RAW_PDF.mkdir(parents=True, exist_ok=True)
     targets = report_files("annual-reports", C.ANNUAL_REPORT_YEARS, None)
     targets += report_files("sustainability-reports", None, C.SUSTAINABILITY_REPORT_LIMIT)

@@ -7,8 +7,8 @@ from .contextualize import add_context
 from .store import build
 
 
+# Bangun data/index dari data/processed/chunks.jsonl (dengan atau tanpa konteks).
 def run(contextualize: bool = True) -> None:
-    """Build data/index from data/processed/chunks.jsonl (optionally with contexts)."""
     chunks = list(read_jsonl(C.CHUNKS_FILE))
     if contextualize:
         add_context(chunks)

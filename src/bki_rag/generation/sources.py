@@ -14,16 +14,16 @@ from .citations import display_title
 REPORT_TYPES = {"annual_report", "sustainability_report"}
 
 
+# Tanggal crawl terakhir (waktu file manifest), menunjukkan umur data halaman situs.
 def _crawl_date() -> str:
-    """Date of the last crawl (manifest file time), the age of website pages."""
     try:
         return datetime.fromtimestamp(C.MANIFEST.stat().st_mtime).strftime("%Y-%m-%d")
     except OSError:
         return "unknown"
 
 
+# Seberapa baru sebuah sumber: tahun laporan, tanggal terbit, atau halaman situs aktif.
 def _status(chunk: dict, crawled: str) -> str:
-    """How current a source is: report year, publication date or live website page."""
     if chunk["doc_type"] in REPORT_TYPES:
         return f"report covering year {(chunk.get('published_at') or '')[:4] or 'unknown'}"
     if chunk.get("published_at"):
@@ -31,8 +31,8 @@ def _status(chunk: dict, crawled: str) -> str:
     return f"current live website page (crawled {crawled})"
 
 
+# Susun sumber sebagai XML untuk model; konteks hasil contextual retrieval dipisah dari isi chunk.
 def build_context(chunks: list[dict]) -> str:
-    """Sources as XML; the contextual-retrieval description is kept separate from the chunk content."""
     crawled = _crawl_date()
     parts = []
     for i, c in enumerate(chunks, 1):

@@ -4,8 +4,8 @@ from __future__ import annotations
 import json
 
 
+# Markdown dari dokumen TipTap (judul, paragraf, tebal, daftar, tabel).
 def tiptap_to_md(node: dict | list | str | None) -> str:
-    """Markdown for a TipTap document (headings, paragraphs, bold, lists, tables)."""
     if node is None:
         return ""
     if isinstance(node, str):
@@ -17,8 +17,8 @@ def tiptap_to_md(node: dict | list | str | None) -> str:
         return "".join(tiptap_to_md(n) for n in node)
     t, kids = node.get("type"), node.get("content", [])
 
+    # Markdown dari anak-anak node ini.
     def inner() -> str:
-        """Markdown of this node's children."""
         return "".join(tiptap_to_md(k) for k in kids)
 
     if t == "text":
@@ -42,8 +42,8 @@ def tiptap_to_md(node: dict | list | str | None) -> str:
     return inner()
 
 
+# Tabel Markdown dari baris-baris tabel TipTap.
 def _table_md(rows_nodes: list[dict]) -> str:
-    """Markdown table from TipTap table rows."""
     rows = [[tiptap_to_md(c).strip().replace("\n", " ").replace("|", "/") for c in r.get("content", [])]
             for r in rows_nodes]
     if not rows:
@@ -54,8 +54,8 @@ def _table_md(rows_nodes: list[dict]) -> str:
     return "\n".join(md) + "\n\n"
 
 
+# Teks dari blok dinamis Strapi (isi rich-text sudah berupa Markdown).
 def blocks_md(blocks: list[dict] | None) -> str:
-    """Text of Strapi dynamic-zone blocks (rich-text bodies are already Markdown)."""
     parts = []
     for b in blocks or []:
         for key in ("body", "content", "text"):

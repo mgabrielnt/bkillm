@@ -15,12 +15,12 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
-# Streamlit Cloud Secrets -> environment variables, before the package reads its configuration.
+# Secrets Streamlit Cloud -> environment variable, sebelum paket membaca konfigurasinya.
 try:
     for key, value in st.secrets.items():
         if isinstance(value, (str, int, float)):
             os.environ.setdefault(key, str(value))
-except Exception:  # no secrets.toml locally: .env is used instead
+except Exception:  # tanpa secrets.toml di lokal: pakai .env
     pass
 
 st.set_page_config(page_title="Asisten Informasi BKI", page_icon="⚓", layout="centered")

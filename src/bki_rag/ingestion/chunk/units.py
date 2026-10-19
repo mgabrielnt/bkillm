@@ -8,20 +8,20 @@ from langdetect import DetectorFactory, detect
 
 from ...core.utils import count_tokens
 
-DetectorFactory.seed = 0  # deterministic language detection
+DetectorFactory.seed = 0  # deteksi bahasa yang hasilnya selalu sama
 HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 
 
+# Deteksi bahasa teks: 'id' atau 'en' (bahasa Inggris jika ragu).
 def detect_lang(text: str) -> str:
-    """'id' or 'en' for a text (English when unsure)."""
     try:
         return "id" if detect(text[:2000]) == "id" else "en"
     except Exception:
         return "en"
 
 
+# Pecah dokumen menjadi paragraf {"text", "path" (judul bagian), "page"}.
 def units(doc: dict) -> list[dict]:
-    """Flatten a doc into paragraph units {"text", "path" (heading titles), "page"}."""
     pages = doc.get("pages") or [{"page": None, "text": doc["text"]}]
     path: list[tuple[int, str]] = []
     out: list[dict] = []
@@ -41,8 +41,8 @@ def units(doc: dict) -> list[dict]:
     return out
 
 
+# Pecah paragraf yang terlalu panjang: tabel per baris (header diulang), teks per kalimat.
 def split_long(text: str, max_tokens: int) -> list[str]:
-    """Split an oversized unit: tables by rows (header repeated), prose by sentences."""
     if count_tokens(text) <= max_tokens:
         return [text]
     lines = text.split("\n")

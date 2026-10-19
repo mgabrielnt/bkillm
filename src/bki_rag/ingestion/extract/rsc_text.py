@@ -12,21 +12,21 @@ _SKIP_TAGS = {"script", "style", "link", "meta", "title", "noscript", "svg"}
 _HEADINGS = {"h1": "# ", "h2": "## ", "h3": "### ", "h4": "#### "}
 
 
+# Teks dari pohon elemen halaman, dengan awalan heading / butir Markdown.
 def tree_text(rows: dict[str, object]) -> list[str]:
-    """Strings of the rendered element tree, with Markdown heading / bullet prefixes."""
     out: list[str] = []
 
+    # Teks di balik "$ref", string itu sendiri, atau None untuk referensi lain.
     def resolve(s: str) -> str | None:
-        """Text behind a "$ref", the string itself, or None for other references."""
         if s.startswith("$") and s[1:] in rows and isinstance(rows[s[1:]], str):
             return rows[s[1:]]
         return None if s.startswith("$") else s
 
+    # Kumpulkan teks dari node mana pun di pohon.
     def walk(o, prefix: str = ""):
-        """Collect text from any node of the tree."""
         if isinstance(o, list):
             if len(o) == 4 and o[0] == "$" and isinstance(o[1], str) and isinstance(o[3], dict):
-                tag, props = o[1], o[3]  # React element: ["$", tag, key, props]
+                tag, props = o[1], o[3]  # elemen React: ["$", tag, key, props]
                 if tag not in _SKIP_TAGS:
                     walk_props(props, _HEADINGS.get(tag, "- " if tag == "li" else ""))
                 return
@@ -39,8 +39,8 @@ def tree_text(rows: dict[str, object]) -> list[str]:
             if s and len(s.strip()) > 1 and not s.startswith(("http", "/")):
                 out.append(prefix + s.strip())
 
+    # Kumpulkan teks dari props sebuah elemen, lewati styling dan metadata.
     def walk_props(props: dict, prefix: str):
-        """Collect text from an element's props, skipping styling and metadata."""
         for k, v in props.items():
             if k in _SKIP_PROPS:
                 continue
@@ -50,4 +50,4 @@ def tree_text(rows: dict[str, object]) -> list[str]:
     for row in rows.values():
         if isinstance(row, (list, dict)):
             walk(row)
-    return [s for i, s in enumerate(out) if i == 0 or s != out[i - 1]]  # drop consecutive repeats
+    return [s for i, s in enumerate(out) if i == 0 or s != out[i - 1]]  # buang pengulangan berturut-turut

@@ -15,8 +15,8 @@ from .fetcher import Fetcher, is_rejected, now, slug
 CMS_DETAIL_PREFIXES = ("/news/", "/articles/", "/events/", "/research/rnd/technical-publication/")
 
 
+# Semua URL (dengan tanggal lastmod) yang tercantum di sitemap.xml.
 def read_sitemap(fetcher: Fetcher) -> list[dict]:
-    """All URLs (with lastmod dates) listed in sitemap.xml."""
     xml = fetcher.get(C.SITEMAP_URL).text
     rows = []
     for block in re.findall(r"<url>(.*?)</url>", xml, re.S):
@@ -28,8 +28,8 @@ def read_sitemap(fetcher: Fetcher) -> list[dict]:
     return rows
 
 
+# Simpan setiap halaman sitemap non-CMS sebagai HTML mentah (data/raw/site/) + baris manifest.
 def crawl_site_pages(fetcher: Fetcher, manifest: list[dict]) -> None:
-    """Save every non-CMS sitemap page as raw HTML (data/raw/site/) with a manifest row."""
     C.RAW_SITE.mkdir(parents=True, exist_ok=True)
     pages = [p for p in read_sitemap(fetcher) if not urlparse(p["url"]).path.startswith(CMS_DETAIL_PREFIXES)]
     print(f"[crawl] {len(pages)} site pages")
@@ -50,8 +50,8 @@ def crawl_site_pages(fetcher: Fetcher, manifest: list[dict]) -> None:
     _crawl_id_dictionary(fetcher, manifest)
 
 
+# Teks Bahasa Indonesia halaman statis (teks bahasa Inggris sudah ada di setiap halaman).
 def _crawl_id_dictionary(fetcher: Fetcher, manifest: list[dict]) -> None:
-    """Indonesian texts of the static pages (the English ones are embedded in every page payload)."""
     resp = fetcher.get(f"{C.SITE_URL}/locales/id/common.json")
     if resp.status_code == 200 and resp.content.startswith(b"{"):
         path = C.RAW_SITE / "locale_id.json"

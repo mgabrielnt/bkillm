@@ -10,7 +10,7 @@ GLOSSARY = ("BKI = Biro Klasifikasi Indonesia (Indonesian Classification Bureau)
             "of Classification Societies; TICCS = Testing, Inspection, Certification, Classification and Statutory; "
             "IDSurvey = state-owned survey services holding led by BKI.")
 
-# Document first, chunk last: identical prefixes per document hit OpenAI's automatic prompt cache.
+# Dokumen dulu, chunk terakhir: awalan yang sama per dokumen memakai cache prompt otomatis OpenAI.
 CONTEXT_PROMPT = """<document title="{title}" url="{url}" type="{doc_type}">
 {document}
 </document>

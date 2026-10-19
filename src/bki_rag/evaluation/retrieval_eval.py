@@ -11,16 +11,16 @@ from ..core.llm import pmap
 from ..retrieval.retriever import RetrievalConfig, Retriever
 
 
+# Peringkat (mulai 1) chunk pertama dari dokumen yang diharapkan, atau None.
 def _first_hit(ranking: list[dict], q: dict) -> int | None:
-    """Rank (1-based) of the first chunk from the expected document, or None."""
     for i, c in enumerate(ranking[:50]):
         if c["group_id"] == q["group_id"] or c["url"] in q["urls"]:
             return i + 1
     return None
 
 
+# Hitung hit@1/5/10/20 dan MRR@20 dari daftar pertanyaan yang sudah diberi peringkat.
 def retrieval_metrics(rows: list[dict]) -> dict:
-    """hit@1/5/10/20 and MRR@20 over a list of ranked questions."""
     ranks = [r["rank"] for r in rows]
     n = len(ranks) or 1
     m = {f"hit@{k}": round(sum(1 for x in ranks if x and x <= k) / n, 3) for k in (1, 5, 10, 20)}
@@ -28,8 +28,8 @@ def retrieval_metrics(rows: list[dict]) -> dict:
     return m
 
 
+# Jalankan pencarian untuk setiap pertanyaan yang bisa dijawab lalu hitung metriknya.
 def evaluate_retrieval(name: str, retriever: Retriever, cfg: RetrievalConfig, golden: list[dict]) -> tuple[dict, list]:
-    """Retrieve for every answerable question and compute the metrics."""
     answerable = [q for q in golden if q["answerable"]]
     t0 = time.time()
     found = pmap(lambda q: retriever.search(q["question"], None, cfg), answerable, workers=8, desc=f"retrieve[{name}]")

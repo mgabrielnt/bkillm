@@ -14,12 +14,12 @@ from ...core.utils import read_jsonl
 _KINDS = {"annual-reports": "annual_report", "sustainability-reports": "sustainability_report"}
 
 
+# Markdown per halaman sebuah PDF (dari cache, atau diurai lalu disimpan ke cache).
 def _pages(m: dict) -> list[dict]:
-    """Per-page Markdown of a PDF (from cache, or parsed and cached)."""
     cache = C.CACHE_DIR / f"pdf_{m['sha256'][:16]}.json"
     if cache.exists():
         return json.loads(cache.read_text(encoding="utf-8"))
-    import pymupdf4llm  # only needed when (re)building data
+    import pymupdf4llm  # hanya perlu saat membangun (ulang) data
 
     print(f"[extract] pdf {m['title']} ({m.get('size_mb')} MB) ...", flush=True)
     pages = pymupdf4llm.to_markdown(str(C.ROOT / m["raw_path"]), page_chunks=True, show_progress=False,
@@ -30,8 +30,8 @@ def _pages(m: dict) -> list[dict]:
     return pages
 
 
+# Satu dokumen per PDF yang diunduh, nomor halaman tetap disimpan.
 def pdf_docs() -> list[dict]:
-    """One document per downloaded PDF, keeping page numbers."""
     docs = []
     for m in read_jsonl(C.MANIFEST):
         if m["source"] != "pdf" or m["status"] != "ok":

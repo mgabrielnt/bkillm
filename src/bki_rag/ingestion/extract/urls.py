@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 from ...core import config as C
 
-# Namespace -> path where the fuzzy match below would be ambiguous or wrong.
+# Namespace -> path untuk kasus yang pencocokan otomatis di bawah bisa salah.
 NAMESPACE_URLS: dict[str, str] = {
     "home": "/", "homepage": "/", "hero": "/", "e_certificate_drawer": "/",
     "aboutUs": "/company-profile", "companyProfile": "/company-profile", "boc": "/company-profile",
@@ -35,14 +35,14 @@ _DOC_TYPES = (("/our-services", "service"), ("/news", "news"), ("/articles", "ar
               ("/esgrc", "esg"), ("/privacy-policy", "policy"), ("/our-policy", "policy"), ("/events", "event"))
 
 
+# Kata-kata huruf kecil dari sebuah key atau bagian path (camelCase dan kebab-case dipecah).
 def _words(key: str) -> set[str]:
-    """Lowercase words of a key or path segment (camelCase and kebab-case split)."""
     key = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
     return {w for w in re.split(r"[^a-zA-Z0-9]+", key.lower()) if w}
 
 
+# URL sitemap yang paling cocok dengan nama namespace (kesamaan kata), atau beranda.
 def map_namespace_url(ns: str, site_paths: list[str]) -> str:
-    """Best matching sitemap URL for a namespace name (word overlap), or the home page."""
     if ns in NAMESPACE_URLS:
         return C.SITE_URL + NAMESPACE_URLS[ns]
     nw = _words(ns)
@@ -59,7 +59,7 @@ def map_namespace_url(ns: str, site_paths: list[str]) -> str:
     return C.SITE_URL + (best if best_score >= 0.5 else "/")
 
 
+# Tipe dokumen (service, news, esg, ...) dari path URL.
 def doc_type_from_url(url: str) -> str:
-    """Document type (service, news, esg, ...) from the URL path."""
     path = urlparse(url).path
     return next((kind for prefix, kind in _DOC_TYPES if path.startswith(prefix)), "company")

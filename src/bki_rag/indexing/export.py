@@ -6,8 +6,8 @@ import csv
 from .store import Index
 
 
+# Tulis `rows` chunk pertama beserta vektor lengkapnya ke file CSV.
 def to_csv(ix: Index, path: str, rows: int) -> None:
-    """Write the first `rows` chunks and their full vectors to CSV."""
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["chunk_id", "title", "url"] + [f"d{j}" for j in range(ix.emb.shape[1])])
@@ -16,9 +16,9 @@ def to_csv(ix: Index, path: str, rows: int) -> None:
     print(f"exported {min(rows, len(ix.chunks))} rows to {path}")
 
 
+# Tulis SEMUA chunk ke .xlsx: sheet "chunks" (isi tiap baris) dan sheet "vectors" (angka vektor).
 def to_excel(ix: Index, path: str) -> None:
-    """Write ALL chunks to an .xlsx: sheet "chunks" (what each row is) and sheet "vectors" (the numbers)."""
-    import xlsxwriter  # pip install xlsxwriter; only needed for this export
+    import xlsxwriter  # pip install xlsxwriter; hanya perlu untuk ekspor ini
 
     wb = xlsxwriter.Workbook(path, {"constant_memory": True})
     info = wb.add_worksheet("chunks")
