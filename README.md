@@ -93,12 +93,15 @@ python -m bki_rag eval --config full --answers --limit 30
 
 ## Halaman yang butuh login
 
-Pertanyaan tentang **BKI Rules & Regulations** (https://www.bki.co.id/research/rnd/bki-rules-regulations)
-tidak dijawab dari sumber; chatbot langsung membalas bahwa informasinya bisa diakses dengan login di link tersebut,
-tanpa konteks dan tanpa memanggil model jawaban. Deteksinya (`retrieval/restricted.py`): pertanyaan berisi kata
-kunci aturan (rules, regulation, aturan, peraturan, pedoman, guidelines, ketentuan, standar teknis) **dan**
-kemiripan embedding dengan deskripsi halaman ≥ `RESTRICTED_MIN_SIM` (0,55), atau kemiripan ≥
-`RESTRICTED_STRONG_SIM` (0,80) tanpa kata kunci. Uji 15 pertanyaan campuran: 15/15 benar.
+Semua pertanyaan tentang **rules dan regulasi** langsung diarahkan ke
+https://www.bki.co.id/research/rnd/bki-rules-regulations (halaman yang butuh login), **tanpa pencarian apa pun**:
+tidak ada embedding, tidak ada retrieval, dan tidak ada panggilan model, jadi biayanya nol.
+
+Deteksinya (`retrieval/restricted.py`) cukup mencocokkan kata kunci di pertanyaan: rule(s), regulation(s) /
+regulatory, aturan, peraturan, regulasi, ketentuan, pedoman, guideline(s), guidance, standar teknis, technical
+standard, termasuk bentuk berakhiran seperti "peraturannya" atau "aturan-aturan". Balasan memakai bahasa penanya.
+Uji 19 pertanyaan campuran: 19/19 benar. Untuk menambah halaman login lain, tambahkan `RestrictedPage` baru ke
+`RESTRICTED_PAGES`.
 
 ## Melihat isi vektor embedding
 

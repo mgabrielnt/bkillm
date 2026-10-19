@@ -3,7 +3,7 @@
   query.py      rewrite the question: standalone, English, Indonesian, keywords, language
   retriever.py  vector + BM25 search for every variant, merged with Reciprocal Rank Fusion
   rerank.py     optional LLM reranker (off by default: it did not improve answers in evaluation)
-  restricted.py questions about pages behind login -> reply with the login link only
+  restricted.py rules & regulations questions -> login link only (keyword check, no search)
 """
 from .retriever import RetrievalConfig, Retriever
 

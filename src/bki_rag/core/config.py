@@ -74,9 +74,6 @@ CANDIDATES_PER_QUERY = int(_env("CANDIDATES_PER_QUERY", "50"))  # per index, per
 RERANK_POOL = int(_env("RERANK_POOL", "40"))
 TOP_K = int(_env("TOP_K", "10"))  # jumlah chunk yang dikirim ke model jawaban
 RRF_K = 60
-# Halaman yang butuh login (retrieval/restricted.py): ambang kemiripan embedding dengan deskripsi halaman.
-RESTRICTED_MIN_SIM = float(_env("RESTRICTED_MIN_SIM", "0.55"))  # jika pertanyaan berisi kata kunci aturan
-RESTRICTED_STRONG_SIM = float(_env("RESTRICTED_STRONG_SIM", "0.80"))  # tanpa kata kunci
 
 # --- Aplikasi web (streamlit_app.py) -------------------------------------------------
 APP_PASSWORD = _env("APP_PASSWORD", "")  # kosong = publik; isi agar aplikasi uji coba bersifat privat
