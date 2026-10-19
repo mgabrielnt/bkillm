@@ -7,8 +7,7 @@ dan chatbot terminal. Model dipanggil lewat API yang kompatibel dengan OpenAI (s
 | Komponen | Pilihan |
 |---|---|
 | Jawaban chatbot | `gpt-5-nano` (reasoning low) |
-| Rewrite pertanyaan EN/ID | `gpt-5-nano` (reasoning minimal) |
-| Konteks chunk saat indexing (sudah di-cache) | `gpt-5.4-nano` |
+| Rewrite pertanyaan, rerank, konteks chunk, juri evaluasi | `gpt-5-nano` (reasoning minimal/low) |
 | Embedding | `text-embedding-3-large` (multilingual EN/ID) |
 | Pencarian kata persis | BM25 (`bm25s`) + Reciprocal Rank Fusion |
 
@@ -46,7 +45,7 @@ bki/
 │   │   ├── chunk/                #   units.py (paragraf, split), chunker.py (packing + metadata)
 │   │   └── pipeline.py           #   perintah `process`
 │   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py
-│   ├── retrieval/                # Tahap 6a: query.py, retriever.py, rerank.py (opsional)
+│   ├── retrieval/                # Tahap 6a: query.py, retriever.py, rerank.py, restricted.py
 │   ├── generation/               # Tahap 6b: sources.py, citations.py, answer.py
 │   ├── evaluation/               # golden.py, retrieval_eval.py, judge.py, runner.py
 │   └── app/
@@ -91,6 +90,15 @@ Evaluasi (berbayar; `--limit` = sampel kecil yang murah):
 ```powershell
 python -m bki_rag eval --config full --answers --limit 30
 ```
+
+## Halaman yang butuh login
+
+Pertanyaan tentang **BKI Rules & Regulations** (https://www.bki.co.id/research/rnd/bki-rules-regulations)
+tidak dijawab dari sumber; chatbot langsung membalas bahwa informasinya bisa diakses dengan login di link tersebut,
+tanpa konteks dan tanpa memanggil model jawaban. Deteksinya (`retrieval/restricted.py`): pertanyaan berisi kata
+kunci aturan (rules, regulation, aturan, peraturan, pedoman, guidelines, ketentuan, standar teknis) **dan**
+kemiripan embedding dengan deskripsi halaman ≥ `RESTRICTED_MIN_SIM` (0,55), atau kemiripan ≥
+`RESTRICTED_STRONG_SIM` (0,80) tanpa kata kunci. Uji 15 pertanyaan campuran: 15/15 benar.
 
 ## Melihat isi vektor embedding
 

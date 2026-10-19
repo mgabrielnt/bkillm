@@ -54,14 +54,14 @@ BASE_URL = _env("OPENAI_BASE_URL", "") or None
 # gpt-5.4-mini terbaik di evaluasi (0,91 benar) dengan harga ±10x lipat.
 CHAT_MODEL = _env("CHAT_MODEL", "gpt-5-nano")
 CHAT_REASONING = _env("CHAT_REASONING", "low")
-# Tugas bantu murah: rewrite pertanyaan, rerank. gpt-5-nano menerima "minimal", bukan "none".
-FAST_MODEL = _env("FAST_MODEL", "gpt-5-nano")
+# Semua tugas lain juga gpt-5-nano. gpt-5-nano menerima reasoning "minimal", bukan "none".
+FAST_MODEL = _env("FAST_MODEL", "gpt-5-nano")  # rewrite pertanyaan, rerank
 FAST_REASONING = _env("FAST_REASONING", "minimal")
-# Pembuatan konteks chunk untuk data/index. Sengaja dipisah dari FAST_MODEL: 1.840 konteks
-# di-cache atas nama model ini; menggantinya membuat `index` membuat ulang (dan membayar) semuanya.
-CONTEXT_MODEL = _env("CONTEXT_MODEL", "gpt-5.4-nano")
-CONTEXT_REASONING = _env("CONTEXT_REASONING", "none")
-JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-5-mini")
+# Konteks chunk saat `index`. Cache konteks disimpan per isi chunk (bukan per model), jadi 1.840 konteks
+# lama (dibuat dengan gpt-5.4-nano) tetap dipakai; hanya chunk baru/berubah yang dibuatkan konteks.
+CONTEXT_MODEL = _env("CONTEXT_MODEL", "gpt-5-nano")
+CONTEXT_REASONING = _env("CONTEXT_REASONING", "minimal")
+JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-5-nano")  # pembuat golden set dan juri evaluasi
 # Harus sama dengan model pembuat index (data/index/meta.json), kalau tidak vektor tidak cocok.
 EMBED_MODEL = _env("EMBED_MODEL", "text-embedding-3-large")
 LLM_CONCURRENCY = int(_env("LLM_CONCURRENCY", "16"))
@@ -74,6 +74,9 @@ CANDIDATES_PER_QUERY = int(_env("CANDIDATES_PER_QUERY", "50"))  # per index, per
 RERANK_POOL = int(_env("RERANK_POOL", "40"))
 TOP_K = int(_env("TOP_K", "10"))  # jumlah chunk yang dikirim ke model jawaban
 RRF_K = 60
+# Halaman yang butuh login (retrieval/restricted.py): ambang kemiripan embedding dengan deskripsi halaman.
+RESTRICTED_MIN_SIM = float(_env("RESTRICTED_MIN_SIM", "0.55"))  # jika pertanyaan berisi kata kunci aturan
+RESTRICTED_STRONG_SIM = float(_env("RESTRICTED_STRONG_SIM", "0.80"))  # tanpa kata kunci
 
 # --- Aplikasi web (streamlit_app.py) -------------------------------------------------
 APP_PASSWORD = _env("APP_PASSWORD", "")  # kosong = publik; isi agar aplikasi uji coba bersifat privat

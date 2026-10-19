@@ -40,7 +40,7 @@ def describe_chunk(chunk: dict, doc_chunks: list[dict]) -> str:
 
 # Isi chunk["context"] untuk setiap chunk; model hanya dipanggil untuk yang belum ada di cache.
 def add_context(chunks: list[dict]) -> None:
-    cache_file = C.CACHE_DIR / f"context_{C.CONTEXT_MODEL}.jsonl"
+    cache_file = C.CACHE_DIR / "context.jsonl"  # per isi chunk, tidak bergantung model
     cache = {r["hash"]: r["context"] for r in read_jsonl(cache_file)} if cache_file.exists() else {}
     by_doc: dict[str, list[dict]] = {}
     for c in chunks:

@@ -6,6 +6,8 @@ import time
 from ..core import config as C
 from ..core.llm import chat
 from ..prompts import ANSWER_SYSTEM_PROMPT, ANSWER_USER_PROMPT
+from ..retrieval.query import detect_lang
+from ..retrieval.restricted import match_restricted, restricted_reply
 from ..retrieval.retriever import RetrievalConfig, Retriever
 from .citations import renumber_citations
 from .sources import build_context
@@ -24,6 +26,12 @@ class RAG:
     # [1]..[k] dan "sources" berisi nomor yang sama persis.
     def answer(self, question: str, history: list[dict] | None = None) -> dict:
         t0 = time.time()
+        page = match_restricted(question)
+        if page:  # halaman di balik login: cukup arahkan ke link login, tanpa konteks dan tanpa model jawaban
+            lang = detect_lang(question)
+            return {"answer": restricted_reply(page, lang), "sources": [], "chunks": [],
+                    "query": {"standalone": question, "lang": lang, "restricted": page["url"]}, "ranking": [],
+                    "timing": {"retrieval_s": round(time.time() - t0, 2), "total_s": round(time.time() - t0, 2)}}
         found = self.retriever.search(question, history, self.cfg)
         t1 = time.time()
         chunks, q = found["chunks"], found["query"]
