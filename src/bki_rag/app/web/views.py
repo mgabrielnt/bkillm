@@ -26,15 +26,18 @@ def password_gate() -> None:
 
 
 def source_links(sources: list[dict], lang: str) -> str:
-    """Numbered Markdown links matching the [n] citations in the answer."""
+    """Links labelled [n] exactly like the citations in the answer.
+
+    Written as "[n] link" lines, not a Markdown numbered list, because Markdown would renumber the list.
+    """
     label, page = ("Sources", "p.") if lang == "en" else ("Sumber", "hal.")
     lines = []
     for s in sources:
         title = s["title"].replace("[", "(").replace("]", ")")
         p = s["pages"]
         pages = "" if not p else f" ({page} {p[0]})" if p[0] == p[1] else f" ({page} {p[0]}-{p[1]})"
-        lines.append(f"{s['n']}. [{title}]({s['url']}){pages}")
-    return f"**{label}:**\n\n" + "\n".join(lines)
+        lines.append(f"\\[{s['n']}\\] [{title}]({s['url']}){pages}")
+    return f"**{label}:**  \n" + "  \n".join(lines)
 
 
 def show_message(msg: dict) -> None:
