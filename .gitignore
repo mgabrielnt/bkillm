@@ -11,3 +11,4 @@ data/usage/
 data/*.log
 .claude/
 *.egg-info/
+exports/

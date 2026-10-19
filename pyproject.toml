@@ -18,7 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 web = ["streamlit>=1.40"]
-ingest = ["httpx>=0.27", "datasketch>=1.6", "pymupdf4llm>=0.0.17"]
+ingest = ["httpx>=0.27", "datasketch>=1.6", "pymupdf4llm>=0.0.17", "xlsxwriter>=3.0"]
 
 [project.scripts]
 bki-rag = "bki_rag.cli:main"

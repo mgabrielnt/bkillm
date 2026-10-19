@@ -33,6 +33,7 @@ def main() -> None:
     v.add_argument("--k", type=int, default=5, help="how many nearest chunks to show")
     v.add_argument("--export", help="also write full vectors of the first --rows chunks to this CSV file")
     v.add_argument("--rows", type=int, default=20)
+    v.add_argument("--excel", help="write ALL chunks and vectors to this .xlsx file")
     args = p.parse_args()
 
     if args.cmd in ("crawl", "all"):
@@ -58,4 +59,4 @@ def main() -> None:
         repl(debug=args.debug)
     if args.cmd == "vectors":
         from .indexing.inspect import show
-        show(args.chunk, args.query, args.dims, args.k, args.export, args.rows)
+        show(args.chunk, args.query, args.dims, args.k, args.export, args.rows, args.excel)

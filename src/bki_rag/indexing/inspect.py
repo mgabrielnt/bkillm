@@ -7,15 +7,14 @@ Files in data/index/:
   meta.json       embedding model and whether contextual retrieval was used
   bm25/           the keyword (BM25) index over the same chunks
 Everything here is free (no API calls) except --query, which embeds your text once.
+Exports: --export file.csv (first --rows chunks), --excel file.xlsx (all chunks).
 """
 from __future__ import annotations
 
-import csv
-
 import numpy as np
 
-from ..core import config as C
 from ..core.llm import embed
+from .export import to_csv, to_excel
 from .store import Index
 
 
@@ -44,8 +43,8 @@ def _print_neighbours(ix: Index, vec: np.ndarray, k: int, skip: int | None = Non
 
 
 def show(chunk_id: str | None = None, query: str | None = None, dims: int = 8, k: int = 5,
-         export: str | None = None, rows: int = 20) -> None:
-    """Print index facts, one chunk's vector and its nearest chunks; optionally export vectors to CSV."""
+         export: str | None = None, rows: int = 20, excel: str | None = None) -> None:
+    """Print index facts, one chunk's vector and its nearest chunks; optionally export to CSV / Excel."""
     ix = Index()
     print(f"embeddings.npy : {ix.emb.shape[0]} rows x {ix.emb.shape[1]} dims, {ix.emb.dtype}, "
           f"model {ix.meta['embed_model']}, contextual={ix.meta['contextual']}")
@@ -63,14 +62,6 @@ def show(chunk_id: str | None = None, query: str | None = None, dims: int = 8, k
         print(f"vector length (norm): {np.linalg.norm(vec):.3f}\nnearest chunks:")
         _print_neighbours(ix, vec, k, skip=i)
     if export:
-        _export(ix, export, rows)
-
-
-def _export(ix: Index, path: str, rows: int) -> None:
-    """Write the first `rows` chunks and their full vectors to CSV (opens in Excel / Sheets)."""
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["chunk_id", "title", "url"] + [f"d{j}" for j in range(ix.emb.shape[1])])
-        for c, vec in zip(ix.chunks[:rows], ix.emb[:rows]):
-            w.writerow([c["chunk_id"], c["title"], c["url"]] + [f"{x:.6f}" for x in vec])
-    print(f"\nexported {min(rows, len(ix.chunks))} rows to {path} (index dir: {C.INDEX_DIR})")
+        to_csv(ix, export, rows)
+    if excel:
+        to_excel(ix, excel)
