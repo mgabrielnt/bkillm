@@ -37,6 +37,22 @@ log = logging.getLogger("bki_rag.web")
 st.set_page_config(page_title="Asisten Informasi BKI", page_icon="⚓", layout="centered")
 
 
+def friendly_error(exc: Exception) -> str:
+    """Tells the app owner what to fix without exposing secrets or stack traces."""
+    import openai
+
+    if isinstance(exc, openai.AuthenticationError) or "api_key" in str(exc).lower():
+        return ("Layanan belum terkonfigurasi: API key kosong atau ditolak. Pemilik aplikasi: periksa "
+                "OPENAI_API_KEY dan OPENAI_BASE_URL di Settings > Secrets.")
+    if isinstance(exc, openai.NotFoundError):
+        return "Model AI yang diatur tidak tersedia. Pemilik aplikasi: periksa CHAT_MODEL / FAST_MODEL di Secrets."
+    if isinstance(exc, (openai.RateLimitError, openai.PermissionDeniedError)) or "budget" in str(exc).lower():
+        return "Kuota atau saldo layanan AI sedang habis. Silakan coba lagi nanti."
+    if isinstance(exc, openai.APIConnectionError):
+        return "Tidak bisa terhubung ke layanan AI. Silakan coba lagi sebentar lagi."
+    return "Maaf, terjadi gangguan saat menjawab. Silakan coba lagi sebentar lagi."
+
+
 @st.cache_resource(show_spinner="Memuat data...")
 def load() -> tuple[RAG, DailyLimiter]:
     return RAG(), DailyLimiter(C.USAGE_FILE, C.DAILY_QUESTION_LIMIT)
@@ -77,6 +93,9 @@ def main() -> None:
     st.caption("Jawaban disusun otomatis dari situs bki.co.id dan laporan resmi BKI, lengkap dengan sumbernya. "
                "Ini bukan kanal resmi PT Biro Klasifikasi Indonesia; untuk keperluan resmi hubungi BKI langsung.")
     password_gate()
+    if not os.environ.get("OPENAI_API_KEY"):
+        st.error("Layanan belum terkonfigurasi: OPENAI_API_KEY belum diisi. Pemilik aplikasi: isi di Settings > Secrets.")
+        st.stop()
     rag, limiter = load()
 
     ss = st.session_state
@@ -118,9 +137,9 @@ def main() -> None:
         with st.spinner("Mencari jawaban..."):
             try:
                 res = rag.answer(question, history)
-            except Exception:
+            except Exception as exc:
                 log.exception("answer failed")
-                st.error("Maaf, terjadi gangguan saat menjawab. Silakan coba lagi sebentar lagi.")
+                st.error(friendly_error(exc))
                 return
     bot_msg = {"role": "assistant", "content": res["answer"], "sources": res["sources"],
                "lang": res["query"].get("lang", "id")}
