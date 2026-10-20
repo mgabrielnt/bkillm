@@ -1,4 +1,4 @@
-"""Prompt for contextual retrieval while indexing (CONTEXT_MODEL), plus the domain glossary.
+"""Prompt for contextual retrieval while indexing (gpt-5-nano), plus the domain glossary.
 
 Placeholders in {braces} are filled with str.format(); literal JSON braces are doubled.
 """

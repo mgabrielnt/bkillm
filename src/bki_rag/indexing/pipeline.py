@@ -1,4 +1,4 @@
-"""Stage 5 orchestration: chunks.jsonl -> (contextual retrieval) -> embeddings + BM25 in data/index/."""
+"""Stage 5 orchestration: chunks.jsonl -> chunk contexts -> embeddings + BM25 in data/index/."""
 from __future__ import annotations
 
 from ..core import config as C
@@ -7,9 +7,8 @@ from .contextualize import add_context
 from .store import build
 
 
-# Bangun data/index dari data/processed/chunks.jsonl (dengan atau tanpa konteks).
-def run(contextualize: bool = True) -> None:
+# Bangun data/index dari data/processed/chunks.jsonl: beri konteks tiap chunk, lalu embedding + BM25.
+def run() -> None:
     chunks = list(read_jsonl(C.CHUNKS_FILE))
-    if contextualize:
-        add_context(chunks)
-    build(chunks, C.INDEX_DIR, use_context=contextualize)
+    add_context(chunks)
+    build(chunks, C.INDEX_DIR)

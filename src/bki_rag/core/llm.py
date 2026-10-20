@@ -1,4 +1,4 @@
-"""Thin OpenAI wrapper: chat, JSON chat, embeddings, and a thread-pool map with retries."""
+"""Thin OpenAI wrapper (gpt-5-nano for text, text-embedding-3-large for vectors) + a thread-pool map."""
 from __future__ import annotations
 
 import json
@@ -23,12 +23,9 @@ def client() -> OpenAI:
 
 
 # Satu panggilan chat ke model; menunggu lalu mencoba lagi jika kena batas laju akun.
-def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None,
-         json_mode: bool = False, max_tokens: int | None = None) -> str:
-    kwargs: dict = {"model": model, "messages": messages}
-    effort = reasoning if reasoning is not None else (C.FAST_REASONING if model == C.FAST_MODEL else C.CHAT_REASONING)
-    if effort:
-        kwargs["reasoning_effort"] = effort
+def chat(messages: list[dict], reasoning: str = C.HELPER_REASONING, json_mode: bool = False,
+         max_tokens: int | None = None) -> str:
+    kwargs: dict = {"model": C.LLM_MODEL, "messages": messages, "reasoning_effort": reasoning}
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
     if max_tokens:
@@ -45,10 +42,10 @@ def chat(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None 
 
 
 # Panggilan chat yang harus menghasilkan JSON; {} jika gagal setelah 3 percobaan.
-def chat_json(messages: list[dict], model: str = C.FAST_MODEL, reasoning: str | None = None) -> dict:
+def chat_json(messages: list[dict], reasoning: str = C.HELPER_REASONING) -> dict:
     for attempt in range(3):
         try:
-            return json.loads(chat(messages, model=model, reasoning=reasoning, json_mode=True))
+            return json.loads(chat(messages, reasoning=reasoning, json_mode=True))
         except json.JSONDecodeError:
             time.sleep(1 + attempt)
     return {}

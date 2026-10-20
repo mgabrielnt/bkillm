@@ -1,10 +1,9 @@
 """Stage 6a - question -> most relevant chunks.
 
+  restricted.py rules & regulations questions -> login link only (keyword check, no search)
   query.py      rewrite the question: standalone, English, Indonesian, keywords, language
   retriever.py  vector + BM25 search for every variant, merged with Reciprocal Rank Fusion
-  rerank.py     optional LLM reranker (off by default: it did not improve answers in evaluation)
-  restricted.py rules & regulations questions -> login link only (keyword check, no search)
 """
-from .retriever import RetrievalConfig, Retriever
+from .retriever import Retriever
 
-__all__ = ["RetrievalConfig", "Retriever"]
+__all__ = ["Retriever"]

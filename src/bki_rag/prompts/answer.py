@@ -1,4 +1,4 @@
-"""The chatbot's system prompt and per-question user message (CHAT_MODEL).
+"""The chatbot's system prompt and per-question user message (gpt-5-nano).
 
 Placeholders in {braces} are filled with str.format(); literal JSON braces are doubled.
 """

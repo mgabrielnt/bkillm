@@ -73,9 +73,9 @@ def embed_cached(texts: list[str], model: str = C.EMBED_MODEL) -> np.ndarray:
 
 
 # Tulis folder index. `search_text` (konteks + chunk) adalah teks yang di-embed dan dimasukkan ke BM25.
-def build(chunks: list[dict], out: Path, use_context: bool, embed_model: str = C.EMBED_MODEL) -> None:
+def build(chunks: list[dict], out: Path, embed_model: str = C.EMBED_MODEL) -> None:
     for c in chunks:
-        c["search_text"] = (c.get("context", "") + "\n\n" + c["text"]).strip() if use_context else c["text"]
+        c["search_text"] = (c.get("context", "") + "\n\n" + c["text"]).strip()
     emb = embed_cached([c["search_text"] for c in chunks], model=embed_model)
     out.mkdir(parents=True, exist_ok=True)
     np.save(out / "embeddings.npy", emb)
@@ -83,6 +83,6 @@ def build(chunks: list[dict], out: Path, use_context: bool, embed_model: str = C
     retriever.index([tokenize(c["search_text"]) for c in chunks], show_progress=False)
     retriever.save(str(out / "bm25"))
     write_jsonl(out / "chunks.jsonl", chunks)
-    (out / "meta.json").write_text(json.dumps({"embed_model": embed_model, "contextual": use_context,
+    (out / "meta.json").write_text(json.dumps({"embed_model": embed_model, "contextual": True,
                                                "chunks": len(chunks)}, indent=1), encoding="utf-8")
-    print(f"[index] wrote {out.relative_to(C.ROOT)}: {len(chunks)} chunks, contextual={use_context}, {embed_model}")
+    print(f"[index] wrote {out}: {len(chunks)} chunks, {embed_model}")

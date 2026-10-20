@@ -1,68 +1,47 @@
-"""Experiment runner: retrieval metrics per configuration (the design doc's ladder) and judged answers.
+"""Evaluation run (`python -m bki_rag eval`): retrieval metrics and, optionally, judged answers.
 
-Writes data/eval/results/<time>_summary.json plus per-config misses / answers files.
+Writes data/eval/results/<time>_summary.json plus the retrieval misses and (with --answers) every answer.
 """
 from __future__ import annotations
 
 import json
 from datetime import datetime
-from pathlib import Path
 
 from ..core import config as C
 from ..core.llm import pmap
-from ..core.utils import read_jsonl, write_jsonl
+from ..core.utils import write_jsonl
 from ..generation.answer import RAG
-from ..indexing.store import Index, build
-from ..retrieval.retriever import RetrievalConfig, Retriever
+from ..retrieval.retriever import Retriever
 from .golden import load_golden
 from .judge import judge, summarize
 from .retrieval_eval import evaluate_retrieval
 
-PLAIN_INDEX = C.DATA / "index_plain"
-
-# Ubah satu hal per eksperimen.
-CONFIGS: dict[str, tuple[Path, RetrievalConfig]] = {
-    "vector": (PLAIN_INDEX, RetrievalConfig("vector", bm25=False, rewrite=False)),
-    "hybrid": (PLAIN_INDEX, RetrievalConfig("hybrid", bm25=True, rewrite=False)),
-    "hybrid_ctx": (C.INDEX_DIR, RetrievalConfig("hybrid_ctx", bm25=True, rewrite=False)),
-    "full": (C.INDEX_DIR, RetrievalConfig("full", bm25=True, rewrite=True)),  # default yang dipakai aplikasi
-    "full_rerank": (C.INDEX_DIR, RetrievalConfig("full_rerank", bm25=True, rewrite=True, rerank=True)),
-}
-
 
 # Jawab setiap pertanyaan golden set lalu minta juri menilainya.
-def evaluate_answers(name: str, rag: RAG, golden: list[dict]) -> tuple[dict, list]:
-    results = pmap(lambda q: rag.answer(q["question"]), golden, workers=8, desc=f"answer[{name}]")
+def evaluate_answers(rag: RAG, golden: list[dict]) -> tuple[dict, list]:
+    results = pmap(lambda q: rag.answer(q["question"]), golden, workers=8, desc="answer")
     grades = pmap(lambda qr: judge(*qr), list(zip(golden, results)), workers=8, desc="judge")
     details = [{"id": q["id"], "question": q["question"], "answerable": q["answerable"], "reference": q["answer"],
                 "answer": r["answer"], "sources": r["sources"], "grade": g, "latency_s": r["timing"]["total_s"]}
                for q, r, g in zip(golden, results, grades)]
     summary = summarize(details)
-    print(f"[eval] {name} answers: {summary}")
+    print(f"[eval] answers: {summary}")
     return summary, details
 
 
-# Evaluasi konfigurasi yang dipilih dan tulis ringkasannya ke data/eval/results/.
-def run(config: str = "full", answers: bool = False, limit: int | None = None) -> None:
+# Evaluasi pencarian (dan jawaban jika answers=True), lalu tulis ringkasannya ke data/eval/results/.
+def run(answers: bool = False, limit: int | None = None) -> None:
     golden = load_golden(limit)
-    names = list(CONFIGS) if config == "all" else config.split(",")
-    if any(CONFIGS[n][0] == PLAIN_INDEX for n in names) and not (PLAIN_INDEX / "meta.json").exists():
-        build(list(read_jsonl(C.CHUNKS_FILE)), PLAIN_INDEX, use_context=False)
     C.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    summary: dict = {}
-    indexes: dict[Path, Index] = {}
-    for name in names:
-        path, cfg = CONFIGS[name]
-        retriever = Retriever(indexes.setdefault(path, Index(path)))
-        metrics, misses = evaluate_retrieval(name, retriever, cfg, golden)
-        summary[name] = {"retrieval": metrics}
-        write_jsonl(C.RESULTS_DIR / f"{stamp}_{name}_retrieval_misses.jsonl", misses)
-        if answers:
-            summary[name]["answers"], details = evaluate_answers(name, RAG(retriever, cfg), golden)
-            write_jsonl(C.RESULTS_DIR / f"{stamp}_{name}_answers.jsonl", details)
+    retriever = Retriever()
+    metrics, misses = evaluate_retrieval(retriever, golden)
+    summary: dict = {"retrieval": metrics}
+    write_jsonl(C.RESULTS_DIR / f"{stamp}_retrieval_misses.jsonl", misses)
+    if answers:
+        summary["answers"], details = evaluate_answers(RAG(retriever), golden)
+        write_jsonl(C.RESULTS_DIR / f"{stamp}_answers.jsonl", details)
     out = C.RESULTS_DIR / f"{stamp}_summary.json"
-    out.write_text(json.dumps({"models": {"chat": C.CHAT_MODEL, "fast": C.FAST_MODEL, "embed": C.EMBED_MODEL},
-                               "n_questions": len(golden), "configs": summary}, indent=1, ensure_ascii=False),
-                   encoding="utf-8")
+    out.write_text(json.dumps({"models": {"llm": C.LLM_MODEL, "embed": C.EMBED_MODEL}, "n_questions": len(golden),
+                               **summary}, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"[eval] summary -> {out.relative_to(C.ROOT)}")

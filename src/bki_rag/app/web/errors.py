@@ -13,7 +13,7 @@ def friendly_error(exc: Exception) -> str:
         return ("Layanan belum terkonfigurasi: API key kosong atau ditolak. Pemilik aplikasi: periksa "
                 "OPENAI_API_KEY dan OPENAI_BASE_URL di Settings > Secrets.")
     if isinstance(exc, openai.NotFoundError):
-        return "Model AI yang diatur tidak tersedia. Pemilik aplikasi: periksa CHAT_MODEL / FAST_MODEL di Secrets."
+        return "Model AI yang diatur tidak tersedia. Pemilik aplikasi: periksa LLM_MODEL / EMBED_MODEL di Secrets."
     if isinstance(exc, (openai.RateLimitError, openai.PermissionDeniedError)) or "budget" in str(exc).lower():
         return "Kuota atau saldo layanan AI sedang habis. Silakan coba lagi nanti."
     if isinstance(exc, openai.APIConnectionError):

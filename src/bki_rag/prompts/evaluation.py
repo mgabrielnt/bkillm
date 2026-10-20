@@ -1,4 +1,4 @@
-"""Prompts for drafting the golden test set and grading answers (JUDGE_MODEL).
+"""Prompts for drafting the golden test set and grading answers (gpt-5-nano).
 
 Placeholders in {braces} are filled with str.format(); literal JSON braces are doubled.
 """

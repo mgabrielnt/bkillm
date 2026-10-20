@@ -13,7 +13,7 @@ def judge(q: dict, res: dict) -> dict:
                           f"context: {c.get('context', '')}\n{c['text']}" for i, c in enumerate(res["chunks"], 1))
     return chat_json([{"role": "user", "content": JUDGE_PROMPT.format(
         question=q["question"], answerable=q["answerable"], reference=q["answer"] or "(none: should refuse)",
-        sources=sources, answer=res["answer"])}], model=C.JUDGE_MODEL, reasoning="low")
+        sources=sources, answer=res["answer"])}], reasoning="low")
 
 
 # Rata-ratakan nilai menjadi metrik ringkasan.

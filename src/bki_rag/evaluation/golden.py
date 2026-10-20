@@ -63,7 +63,7 @@ def build_golden() -> None:
         c, qlang, style = task
         return chat_json([{"role": "user", "content": GOLDEN_PROMPT.format(
             title=c["title"], doc_type=c["doc_type"], date=(c.get("published_at") or "")[:10],
-            text=c["text"][:6000], qlang=qlang, style=GOLDEN_STYLES[style])}], model=C.JUDGE_MODEL, reasoning="low")
+            text=c["text"][:6000], qlang=qlang, style=GOLDEN_STYLES[style])}], reasoning="low")
 
     rows, per_type = [], defaultdict(int)
     for (c, qlang, style), r in zip(tasks, pmap(draft, tasks, desc="golden")):

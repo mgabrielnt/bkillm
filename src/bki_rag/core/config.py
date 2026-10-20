@@ -50,20 +50,14 @@ SUSTAINABILITY_REPORT_LIMIT = int(_env("SUSTAINABILITY_REPORT_LIMIT", "1"))
 # --- Model (endpoint apa pun yang kompatibel dengan OpenAI) ----------------------
 # Kosong = api.openai.com; mis. https://ai.sumopod.com/v1 untuk gateway SumoPod.
 BASE_URL = _env("OPENAI_BASE_URL", "") or None
-# Menjawab: gpt-5-nano terukur ±$0,0006 per pertanyaan (input $0,05, output $0,40 per 1 juta token).
-# gpt-5.4-mini terbaik di evaluasi (0,91 benar) dengan harga ±10x lipat.
-CHAT_MODEL = _env("CHAT_MODEL", "gpt-5-nano")
-CHAT_REASONING = _env("CHAT_REASONING", "low")
-# Semua tugas lain juga gpt-5-nano. gpt-5-nano menerima reasoning "minimal", bukan "none".
-FAST_MODEL = _env("FAST_MODEL", "gpt-5-nano")  # rewrite pertanyaan, rerank
-FAST_REASONING = _env("FAST_REASONING", "minimal")
-# Konteks chunk saat `index`. Cache konteks disimpan per isi chunk (bukan per model), jadi 1.840 konteks
-# lama (dibuat dengan gpt-5.4-nano) tetap dipakai; hanya chunk baru/berubah yang dibuatkan konteks.
-CONTEXT_MODEL = _env("CONTEXT_MODEL", "gpt-5-nano")
-CONTEXT_REASONING = _env("CONTEXT_REASONING", "minimal")
-JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-5-nano")  # pembuat golden set dan juri evaluasi
-# Harus sama dengan model pembuat index (data/index/meta.json), kalau tidak vektor tidak cocok.
+# Hanya dua model: gpt-5-nano untuk semua tugas teks (jawaban, rewrite pertanyaan, konteks chunk, evaluasi)
+# dan text-embedding-3-large untuk embedding. Biaya terukur ±$0,0006 per pertanyaan.
+LLM_MODEL = _env("LLM_MODEL", "gpt-5-nano")
+# Embedding harus sama dengan model pembuat index (data/index/meta.json), kalau tidak vektor tidak cocok.
 EMBED_MODEL = _env("EMBED_MODEL", "text-embedding-3-large")
+# Tingkat "berpikir" gpt-5-nano: jawaban sedikit lebih teliti, tugas bantu secepat mungkin.
+ANSWER_REASONING = _env("ANSWER_REASONING", "low")
+HELPER_REASONING = _env("HELPER_REASONING", "minimal")
 LLM_CONCURRENCY = int(_env("LLM_CONCURRENCY", "16"))
 
 # --- Parameter pipeline --------------------------------------------------------
@@ -71,7 +65,6 @@ CHUNK_TARGET_TOKENS = int(_env("CHUNK_TARGET_TOKENS", "500"))
 CHUNK_MAX_TOKENS = int(_env("CHUNK_MAX_TOKENS", "800"))
 CONTEXT_WINDOW_TOKENS = 3000  # potongan dokumen panjang yang dibaca model konteks (hemat batas token/menit)
 CANDIDATES_PER_QUERY = int(_env("CANDIDATES_PER_QUERY", "50"))  # per index, per versi pertanyaan
-RERANK_POOL = int(_env("RERANK_POOL", "40"))
 TOP_K = int(_env("TOP_K", "10"))  # jumlah chunk yang dikirim ke model jawaban
 RRF_K = 60
 

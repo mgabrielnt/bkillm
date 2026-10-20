@@ -1,4 +1,4 @@
-"""Prompts for query rewriting and the optional LLM reranker (FAST_MODEL).
+"""Prompt for query rewriting (gpt-5-nano).
 
 Placeholders in {braces} are filled with str.format(); literal JSON braces are doubled.
 """
@@ -17,15 +17,3 @@ Return JSON:
   "id": "the standalone question in Indonesian",
   "keywords": "5-12 exact search terms in both languages: names, acronyms, regulation numbers, synonyms (e.g. 'load line garis muat ICLL')",
   "lang": "language of the latest user message: 'id' for Indonesian (including casual/slang), 'en' for English"}}"""
-
-
-RERANK_PROMPT = """Rate how useful each passage is for answering the question, from 0 (irrelevant) to 10
-(directly contains the answer). Passages may be in English or Indonesian; judge meaning, not language.
-Prefer passages with the specific facts asked for (names, numbers, dates, procedures).
-
-Question: {question}
-
-Passages:
-{passages}
-
-Return JSON: {{"scores": {{"<passage id>": <0-10>, ...}}}} with a score for EVERY passage id."""

@@ -35,7 +35,7 @@ def describe_chunk(chunk: dict, doc_chunks: list[dict]) -> str:
     prompt = CONTEXT_PROMPT.format(
         title=chunk["title"], url=chunk["url"], doc_type=chunk["doc_type"], chunk=chunk["text"], glossary=GLOSSARY,
         document=truncate_tokens(_document_window(chunk, doc_chunks), C.CONTEXT_WINDOW_TOKENS + 1500))
-    return chat([{"role": "user", "content": prompt}], model=C.CONTEXT_MODEL, reasoning=C.CONTEXT_REASONING).strip()
+    return chat([{"role": "user", "content": prompt}]).strip()
 
 
 # Isi chunk["context"] untuk setiap chunk; model hanya dipanggil untuk yang belum ada di cache.
@@ -48,7 +48,7 @@ def add_context(chunks: list[dict]) -> None:
     for cs in by_doc.values():
         cs.sort(key=lambda x: x["chunk_index"])
     todo = [c for c in chunks if c["content_hash"] not in cache]
-    print(f"[index] contextualising {len(todo)} chunks ({len(chunks) - len(todo)} cached) with {C.CONTEXT_MODEL}")
+    print(f"[index] contextualising {len(todo)} chunks ({len(chunks) - len(todo)} cached) with {C.LLM_MODEL}")
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     lock = threading.Lock()
 

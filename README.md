@@ -4,12 +4,14 @@ Chatbot tanya-jawab atas konten publik **bki.co.id** (PT Biro Klasifikasi Indone
 dan laporan tahunan/keberlanjutan. Setiap jawaban disertai link sumbernya. Tersedia sebagai UI web (Streamlit)
 dan chatbot terminal. Model dipanggil lewat API yang kompatibel dengan OpenAI (saat ini gateway SumoPod).
 
-| Komponen | Pilihan |
+Hanya dua model yang dipakai:
+
+| Model | Untuk |
 |---|---|
-| Jawaban chatbot | `gpt-5-nano` (reasoning low) |
-| Rewrite pertanyaan, rerank, konteks chunk, juri evaluasi | `gpt-5-nano` (reasoning minimal/low) |
-| Embedding | `text-embedding-3-large` (multilingual EN/ID) |
-| Pencarian kata persis | BM25 (`bm25s`) + Reciprocal Rank Fusion |
+| `gpt-5-nano` | semua tugas teks: jawaban, rewrite pertanyaan, konteks chunk, evaluasi |
+| `text-embedding-3-large` | embedding (multilingual EN/ID) |
+
+Pencarian menggabungkan embedding dan BM25 (kata persis) dengan Reciprocal Rank Fusion.
 
 **Biaya terukur** (tagihan nyata SumoPod): rata-rata **$0,0006 (±Rp10) per pertanyaan**; ±Rp10.000 per 1.000
 pertanyaan. Sebagian besar untuk membaca 10 potongan sumber (±6.900 token input) dan token "berpikir" model,
@@ -30,12 +32,12 @@ bki/
 ├── src/bki_rag/
 │   ├── cli.py                    # python -m bki_rag <perintah>
 │   ├── core/                     # dasar bersama
-│   │   ├── config.py             #   path, model, parameter (bisa diubah lewat .env / Secrets)
+│   │   ├── config.py             #   path, 2 model, parameter (bisa diubah lewat .env / Secrets)
 │   │   ├── llm.py                #   client OpenAI-compatible: chat, JSON, embedding, retry
 │   │   └── utils.py              #   JSONL, hash, hitung token, normalisasi teks
 │   ├── prompts/                  # SEMUA prompt, satu file per tahap
 │   │   ├── indexing.py           #   konteks chunk + glosarium
-│   │   ├── retrieval.py          #   rewrite pertanyaan + rerank
+│   │   ├── retrieval.py          #   rewrite pertanyaan
 │   │   ├── answer.py             #   system prompt chatbot
 │   │   └── evaluation.py         #   golden set + juri
 │   ├── ingestion/                # Tahap 1-4: situs -> chunk bersih
@@ -45,7 +47,7 @@ bki/
 │   │   ├── chunk/                #   units.py (paragraf, split), chunker.py (packing + metadata)
 │   │   └── pipeline.py           #   perintah `process`
 │   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py
-│   ├── retrieval/                # Tahap 6a: query.py, retriever.py, rerank.py, restricted.py
+│   ├── retrieval/                # Tahap 6a: restricted.py, query.py, retriever.py
 │   ├── generation/               # Tahap 6b: sources.py, citations.py, answer.py
 │   ├── evaluation/               # golden.py, retrieval_eval.py, judge.py, runner.py
 │   └── app/
@@ -54,7 +56,7 @@ bki/
 └── data/
     ├── index/                    # index yang dipakai aplikasi (di-commit, ±34 MB)
     ├── processed/                # dokumen & chunk bersih + laporan pembersihan
-    ├── eval/                     # golden.jsonl + ringkasan hasil evaluasi
+    ├── eval/                     # golden.jsonl (hasil evaluasi ditulis ke eval/results/)
     ├── raw/                      # hasil crawl mentah (lokal saja)
     └── cache/                    # cache berbayar: konteks, embedding, parsing PDF (lokal saja)
 ```
@@ -88,7 +90,7 @@ python -m bki_rag index     # konteks + embedding; hanya chunk baru/berubah yang
 Evaluasi (berbayar; `--limit` = sampel kecil yang murah):
 
 ```powershell
-python -m bki_rag eval --config full --answers --limit 30
+python -m bki_rag eval --answers --limit 30
 ```
 
 ## Halaman yang butuh login
@@ -111,7 +113,7 @@ Vektor tersimpan di `data/index/`:
 |---|---|
 | `embeddings.npy` | matriks float32 1840 × 3072 (`text-embedding-3-large`); satu baris = satu chunk, sudah dinormalisasi (panjang 1) sehingga dot product = cosine similarity |
 | `chunks.jsonl` | teks + metadata tiap chunk, urutannya sama dengan baris matriks (baris i = baris ke-i file ini) |
-| `meta.json` | model embedding dan apakah contextual retrieval dipakai |
+| `meta.json` | model embedding dan jumlah chunk |
 | `bm25/` | index kata kunci (BM25) untuk chunk yang sama |
 
 Cara membukanya (gratis, tanpa API):
@@ -160,28 +162,10 @@ bukan kanal resmi BKI.
 
 ## Hasil evaluasi
 
-Golden set: 103 pertanyaan dari 12 tipe dokumen (60% pendek gaya chat, ±50% lintas bahasa) + 20 pertanyaan
-jebakan. Dibuat LLM dari chunk acak, jadi angkanya cenderung optimis. Ringkasan mentah ada di `data/eval/results/`.
+Golden set (`data/eval/golden.jsonl`): 103 pertanyaan dari 12 tipe dokumen (60% pendek gaya chat, ±50% lintas
+bahasa) + 20 pertanyaan jebakan yang harus ditolak. Pencarian menemukan dokumen yang benar di 10 teratas untuk
+99% pertanyaan. Kualitas jawaban `gpt-5-nano` baru diuji manual; untuk mengukurnya jalankan
+`python -m bki_rag eval --answers --limit 30` (berbayar, ±Rp5.000).
 
-Retrieval (hit@k = dokumen sumber yang benar ada di k teratas):
-
-| Konfigurasi | hit@1 | hit@5 | hit@10 | MRR | lintas bahasa hit@10 |
-|---|---|---|---|---|---|
-| vector (embedding saja) | 0,728 | 0,971 | 0,981 | 0,824 | 1,000 |
-| hybrid (+ BM25, RRF) | 0,748 | 0,932 | 0,961 | 0,839 | 0,966 |
-| hybrid_ctx (+ contextual retrieval) | 0,786 | 0,961 | 0,981 | 0,861 | 0,983 |
-| **full** (+ rewrite EN/ID), dipakai | 0,786 | 0,971 | 0,990 | 0,867 | 1,000 |
-| full_rerank (+ rerank LLM) | 0,777 | 0,922 | 0,951 | 0,844 | 0,966 |
-
-Jawaban (123 pertanyaan, model jawaban `gpt-5.4-mini`, dinilai `gpt-5.4-mini`):
-
-| Konfigurasi | benar | setia sumber | sitasi | salah tolak | jebakan ditolak | latensi |
-|---|---|---|---|---|---|---|
-| full | 0,913 | 0,805 | 0,981 | 2,9% | 100% | 3,7 dtk |
-| full_rerank | 0,888 | 0,821 | 0,990 | 3,9% | 100% | 5,8 dtk |
-
-Catatan yang masih terbuka:
-- Model jawaban kini `gpt-5-nano` (±10x lebih murah); kualitasnya baru diuji manual pada beberapa pertanyaan,
-  belum dengan evaluasi penuh.
-- Perbaikan ekstraksi halaman Company Profile (visi-misi terbaru, biografi direksi) sudah ada di
-  `data/processed/` tetapi 34 chunk-nya belum masuk `data/index/` (perlu `python -m bki_rag index`, ±Rp200).
+Catatan terbuka: perbaikan halaman Company Profile (visi-misi terbaru, biografi direksi) sudah ada di
+`data/processed/`, tetapi 34 chunk-nya belum masuk `data/index/` (perlu `python -m bki_rag index`, ±Rp200).

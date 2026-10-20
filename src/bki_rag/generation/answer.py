@@ -13,7 +13,7 @@ from ..core.llm import chat
 from ..prompts import ANSWER_SYSTEM_PROMPT, ANSWER_USER_PROMPT
 from ..retrieval.query import detect_lang
 from ..retrieval.restricted import RestrictedPage, match_restricted, restricted_reply
-from ..retrieval.retriever import RetrievalConfig, Retriever
+from ..retrieval.retriever import Retriever
 from .citations import renumber_citations
 from .sources import build_context
 
@@ -41,10 +41,9 @@ def _messages(question: str, query: dict, chunks: list[dict], history: list[dict
 
 # Pipeline RAG untuk satu pertanyaan: cari sumber, tanya model, kembalikan jawaban + sumber.
 class RAG:
-    # Pakai retriever yang diberikan (default: data/index) dan konfigurasi pencariannya.
-    def __init__(self, retriever: Retriever | None = None, cfg: RetrievalConfig = RetrievalConfig()):
+    # Pakai retriever yang diberikan (default: pencarian di data/index).
+    def __init__(self, retriever: Retriever | None = None):
         self.retriever = retriever or Retriever()
-        self.cfg = cfg
 
     # Mengembalikan {"answer", "sources", "chunks", "query", "ranking", "timing"}. "answer" memakai sitasi
     # [1]..[k] dan "sources" berisi nomor yang sama persis.
@@ -53,10 +52,10 @@ class RAG:
         page = match_restricted(question)
         if page:
             return self._restricted(question, page, t0)
-        found = self.retriever.search(question, history, self.cfg)
+        found = self.retriever.search(question, history)
         t1 = time.time()
         chunks, query = found["chunks"], found["query"]
-        reply = chat(_messages(question, query, chunks, history), model=C.CHAT_MODEL, reasoning=C.CHAT_REASONING)
+        reply = chat(_messages(question, query, chunks, history), reasoning=C.ANSWER_REASONING)
         text, sources = renumber_citations(reply, chunks)
         return _result(text, sources, chunks, query, found["ranking"], t0, t1)
 

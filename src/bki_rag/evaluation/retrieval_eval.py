@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 
 from ..core.llm import pmap
-from ..retrieval.retriever import RetrievalConfig, Retriever
+from ..retrieval.retriever import Retriever
 
 
 # Peringkat (mulai 1) chunk pertama dari dokumen yang diharapkan, atau None.
@@ -29,10 +29,10 @@ def retrieval_metrics(rows: list[dict]) -> dict:
 
 
 # Jalankan pencarian untuk setiap pertanyaan yang bisa dijawab lalu hitung metriknya.
-def evaluate_retrieval(name: str, retriever: Retriever, cfg: RetrievalConfig, golden: list[dict]) -> tuple[dict, list]:
+def evaluate_retrieval(retriever: Retriever, golden: list[dict]) -> tuple[dict, list]:
     answerable = [q for q in golden if q["answerable"]]
     t0 = time.time()
-    found = pmap(lambda q: retriever.search(q["question"], None, cfg), answerable, workers=8, desc=f"retrieve[{name}]")
+    found = pmap(lambda q: retriever.search(q["question"]), answerable, workers=8, desc="retrieve")
     rows = [{**q, "rank": _first_hit(f["ranking"], q)} for q, f in zip(answerable, found)]
     m = retrieval_metrics(rows)
     m["by_q_lang"] = {lang: retrieval_metrics([r for r in rows if r["q_lang"] == lang]) for lang in ("en", "id")}
@@ -41,7 +41,7 @@ def evaluate_retrieval(name: str, retriever: Retriever, cfg: RetrievalConfig, go
     m["by_type"] = {t: retrieval_metrics([r for r in rows if r["doc_type"] == t])["hit@10"]
                     for t in sorted({r["doc_type"] for r in rows})}
     m["avg_retrieval_s"] = round((time.time() - t0) * 8 / max(len(rows), 1), 2)
-    print(f"[eval] {name:12s} hit@1 {m['hit@1']:.3f}  hit@5 {m['hit@5']:.3f}  hit@10 {m['hit@10']:.3f}  "
+    print(f"[eval] retrieval  hit@1 {m['hit@1']:.3f}  hit@5 {m['hit@5']:.3f}  hit@10 {m['hit@10']:.3f}  "
           f"hit@20 {m['hit@20']:.3f}  mrr {m['mrr@20']:.3f}  cross-lingual hit@10 {m['cross_lingual']['hit@10']:.3f}  "
           f"short-q hit@10 {m['short_questions']['hit@10']:.3f}")
     return m, [r for r in rows if not r["rank"] or r["rank"] > 10]

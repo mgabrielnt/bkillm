@@ -34,7 +34,7 @@ def ask_once(question: str, debug: bool = False) -> None:
 def repl(debug: bool = False) -> None:
     rag = RAG()
     history: list[dict] = []
-    print(f"BKI RAG chatbot ({C.CHAT_MODEL} + {rag.retriever.index.meta['embed_model']}, "
+    print(f"BKI RAG chatbot ({C.LLM_MODEL} + {rag.retriever.index.meta['embed_model']}, "
           f"{len(rag.retriever.index.chunks)} chunks). {HELP}\n")
     while True:
         try:
