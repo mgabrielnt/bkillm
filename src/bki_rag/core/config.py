@@ -58,6 +58,8 @@ EMBED_MODEL = _env("EMBED_MODEL", "text-embedding-3-large")
 # Tingkat "berpikir" gpt-5-nano: jawaban sedikit lebih teliti, tugas bantu secepat mungkin.
 ANSWER_REASONING = _env("ANSWER_REASONING", "low")
 HELPER_REASONING = _env("HELPER_REASONING", "minimal")
+# Harga per 1 juta token (USD) untuk menghitung biaya di evaluasi: gpt-5-nano input/output, embedding large.
+PRICE_PER_1M_TOKENS = {"llm_in": 0.05, "llm_out": 0.40, "embed": 0.13}
 LLM_CONCURRENCY = int(_env("LLM_CONCURRENCY", "16"))
 
 # --- Parameter pipeline --------------------------------------------------------

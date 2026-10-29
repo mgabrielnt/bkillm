@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
@@ -14,6 +15,25 @@ from . import config as C
 
 T = TypeVar("T")
 R = TypeVar("R")
+_USAGE = {"llm_in": 0, "llm_out": 0, "embed": 0}  # token terpakai sejak program mulai (untuk hitung biaya)
+_USAGE_LOCK = threading.Lock()
+
+
+# Tambahkan jumlah token ke penghitung pemakaian.
+def _track(key: str, tokens: int | None) -> None:
+    with _USAGE_LOCK:
+        _USAGE[key] += tokens or 0
+
+
+# Salinan penghitung token: {"llm_in", "llm_out", "embed"}.
+def usage() -> dict:
+    with _USAGE_LOCK:
+        return dict(_USAGE)
+
+
+# Biaya dalam USD dari selisih dua salinan penghitung token (harga per 1 juta token di config).
+def cost_usd(before: dict, after: dict) -> float:
+    return sum((after[k] - before[k]) * C.PRICE_PER_1M_TOKENS[k] / 1e6 for k in _USAGE)
 
 
 # Client OpenAI-compatible yang dipakai bersama (base URL dan key dari config).
@@ -33,6 +53,9 @@ def chat(messages: list[dict], reasoning: str = C.HELPER_REASONING, json_mode: b
     for attempt in range(8):  # batas token/menit akun ketat untuk pekerjaan massal: tunggu lalu coba lagi
         try:
             resp = client().chat.completions.create(**kwargs)
+            if resp.usage:
+                _track("llm_in", resp.usage.prompt_tokens)
+                _track("llm_out", resp.usage.completion_tokens)
             return resp.choices[0].message.content or ""
         except RateLimitError:
             if attempt == 7:
@@ -56,6 +79,7 @@ def embed(texts: list[str], model: str = C.EMBED_MODEL, batch: int = 128) -> np.
     out: list[list[float]] = []
     for i in range(0, len(texts), batch):
         resp = client().embeddings.create(model=model, input=[t[:30000] for t in texts[i:i + batch]])
+        _track("embed", resp.usage.total_tokens if resp.usage else 0)
         out += [d.embedding for d in resp.data]
     arr = np.asarray(out, dtype=np.float32)
     return arr / np.linalg.norm(arr, axis=1, keepdims=True)

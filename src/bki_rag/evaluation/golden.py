@@ -27,7 +27,7 @@ UNANSWERABLE = [
     "What will BKI's total revenue be in 2030?",
     "Bagaimana cara memasak rendang yang empuk?",
     "Who won the 2022 FIFA World Cup?",
-    "Berapa gaji pokok surveyor junior di BKI?",
+    "Berapa tarif parkir mobil per jam di kantor pusat BKI?",
     "What is the Wi-Fi password at the BKI head office?",
     "Berapa jumlah kapal yang diklasifikasikan BKI pada tahun 1990?",
     "What is the phone number of BKI's representative office in Tokyo?",

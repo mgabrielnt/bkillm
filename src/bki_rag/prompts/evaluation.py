@@ -1,7 +1,4 @@
-"""Prompts for drafting the golden test set and grading answers (gpt-5-nano).
-
-Placeholders in {braces} are filled with str.format(); literal JSON braces are doubled.
-"""
+"""Prompts for drafting the golden test set and grading answers (gpt-5-nano)."""
 
 GOLDEN_STYLES = {
     "short": ("Make it SHORT and casual (max 15 words), the way people type into a chat box. Do not quote document "
@@ -28,24 +25,22 @@ Requirements:
 - If the passage is only navigation, a list of titles, an unreadable table, or has no meaningful fact, set suitable=false.
 Return JSON: {{"suitable": true/false, "question": "...", "answer": "short reference answer in the question's language"}}"""
 
-JUDGE_PROMPT = """You grade a chatbot answer about PT Biro Klasifikasi Indonesia (BKI).
+JUDGE_PROMPT = """Grade a chatbot answer about PT Biro Klasifikasi Indonesia (BKI).
 
 Question: {question}
-Answerable from the knowledge base: {answerable}
+Answerable from knowledge base: {answerable}
 Reference answer: {reference}
 
-Sources given to the chatbot:
+Retrieved sources given to the chatbot:
 {sources}
 
 Chatbot answer:
 {answer}
 
 Grade strictly and return JSON:
-{{"correct": 1 if the answer conveys the reference answer's key facts (0.5 if partially, 0 if wrong/missing;
-             for unanswerable questions 1 if it clearly says the information is not available / declines, else 0),
-  "faithful": 1 if every BKI-specific claim in the answer is supported by the sources (text, context, title
-              or date all count as support), else 0,
-  "cited": 1 if the answer cites [n] sources that support its main claims (1 also for a correct refusal without citations), else 0,
-  "refused": true if the answer says the information was not found / declines, else false,
-  "same_language": true if the answer is in the same language as the question,
-  "note": "one short sentence"}}"""
+{{
+  "refused": true if the answer states that the requested specific information is not available / not mentioned / not found in the sources or declines to answer (even if it mentions related context or alternative info), else false,
+  "faithful": 1 if all factual claims made in the answer are supported by the retrieved sources (anti-hallucination), else 0,
+  "correct": 1 if the answer correctly conveys the key facts from the reference answer (0.5 partial, 0 incorrect; for unanswerable questions 1 if it indicates the info is not available or declines, else 0),
+  "note": "one short sentence"
+}}"""

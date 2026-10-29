@@ -1,47 +1,33 @@
-"""Retrieval quality: does the right document show up near the top for each golden question?
-
-A hit means a chunk of the same document *group* (an English/Indonesian translation pair of a CMS item
-counts as one group) appears in the top k.
-"""
+"""Stage 1: evaluasi temu dokumen (Hit@10, MRR@10)."""
 from __future__ import annotations
 
-import time
-
+from typing import Any
 from ..core.llm import pmap
+from ..retrieval.restricted import match_restricted
 from ..retrieval.retriever import Retriever
 
 
-# Peringkat (mulai 1) chunk pertama dari dokumen yang diharapkan, atau None.
-def _first_hit(ranking: list[dict], q: dict) -> int | None:
-    for i, c in enumerate(ranking[:50]):
-        if c["group_id"] == q["group_id"] or c["url"] in q["urls"]:
-            return i + 1
-    return None
+def _is_hit(chunk: dict, q: dict) -> bool:
+    if q.get("group_id") and chunk.get("group_id") == q["group_id"]:
+        return True
+    return chunk.get("url") in (q.get("urls") or [])
 
 
-# Hitung hit@1/5/10/20 dan MRR@20 dari daftar pertanyaan yang sudah diberi peringkat.
-def retrieval_metrics(rows: list[dict]) -> dict:
-    ranks = [r["rank"] for r in rows]
-    n = len(ranks) or 1
-    m = {f"hit@{k}": round(sum(1 for x in ranks if x and x <= k) / n, 3) for k in (1, 5, 10, 20)}
-    m["mrr@20"] = round(sum(1 / x for x in ranks if x and x <= 20) / n, 3)
-    return m
-
-
-# Jalankan pencarian untuk setiap pertanyaan yang bisa dijawab lalu hitung metriknya.
-def evaluate_retrieval(retriever: Retriever, golden: list[dict]) -> tuple[dict, list]:
-    answerable = [q for q in golden if q["answerable"]]
-    t0 = time.time()
+def evaluate_retrieval(retriever: Retriever, golden: list[dict]) -> tuple[dict[str, Any], list[dict]]:
+    """Cek apakah dokumen sumber masuk top-10 (Hit@10) dan di urutan ke berapa (MRR@10)."""
+    answerable = [q for q in golden if q.get("answerable") and not match_restricted(q["question"])]
     found = pmap(lambda q: retriever.search(q["question"]), answerable, workers=8, desc="retrieve")
-    rows = [{**q, "rank": _first_hit(f["ranking"], q)} for q, f in zip(answerable, found)]
-    m = retrieval_metrics(rows)
-    m["by_q_lang"] = {lang: retrieval_metrics([r for r in rows if r["q_lang"] == lang]) for lang in ("en", "id")}
-    m["cross_lingual"] = retrieval_metrics([r for r in rows if r["q_lang"] != r["source_lang"]])
-    m["short_questions"] = retrieval_metrics([r for r in rows if r.get("style") == "short"])
-    m["by_type"] = {t: retrieval_metrics([r for r in rows if r["doc_type"] == t])["hit@10"]
-                    for t in sorted({r["doc_type"] for r in rows})}
-    m["avg_retrieval_s"] = round((time.time() - t0) * 8 / max(len(rows), 1), 2)
-    print(f"[eval] retrieval  hit@1 {m['hit@1']:.3f}  hit@5 {m['hit@5']:.3f}  hit@10 {m['hit@10']:.3f}  "
-          f"hit@20 {m['hit@20']:.3f}  mrr {m['mrr@20']:.3f}  cross-lingual hit@10 {m['cross_lingual']['hit@10']:.3f}  "
-          f"short-q hit@10 {m['short_questions']['hit@10']:.3f}")
-    return m, [r for r in rows if not r["rank"] or r["rank"] > 10]
+
+    hits, rr_sum = 0, 0.0
+    misses = []
+    for q, res in zip(answerable, found):
+        ranking = res.get("ranking", [])[:10]
+        rank = next((i for i, c in enumerate(ranking, 1) if _is_hit(c, q)), None)
+        if rank:
+            hits += 1
+            rr_sum += 1 / rank
+        else:
+            misses.append(q)
+
+    n = max(len(answerable), 1)
+    return {"hit@10": round(hits / n, 3), "mrr@10": round(rr_sum / n, 3)}, misses
