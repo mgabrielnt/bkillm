@@ -28,13 +28,15 @@ def _rate(flags: list[bool]) -> float | None:
 
 
 def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any]:
+    answered = [d for d in details if not d.get("error")]
+    graded = [d for d in answered if d.get("grade") and not d["grade"].get("error")]
     n = len(details)
-    if n == 0:
-        return {}
+    if not graded:
+        return {"n_ungraded": n}
 
     # Soal Rules & Regulations sengaja dialihkan ke halaman login, jadi tidak dinilai sebagai jawaban
-    ans_items = [d for d in details if d.get("answerable") and not match_restricted(d["question"])]
-    unans_items = [d for d in details if not d.get("answerable")]
+    ans_items = [d for d in graded if d.get("answerable") and not match_restricted(d["question"])]
+    unans_items = [d for d in graded if not d.get("answerable")]
     refused = lambda d: bool(d.get("grade", {}).get("refused"))
     non_refused = [d for d in ans_items if not refused(d)]
 
@@ -51,7 +53,7 @@ def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any
     false_refusal = _rate([refused(d) for d in ans_items])
 
     # Latensi dan biaya
-    latencies = [d.get("latency_s", 0.0) for d in details]
+    latencies = [d.get("latency_s", 0.0) for d in answered]
 
     return {
         "faithfulness": faithfulness,
@@ -61,4 +63,5 @@ def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any
         "_latency_p50": round(float(np.percentile(latencies, 50)), 2),
         "_latency_p95": round(float(np.percentile(latencies, 95)), 2),
         "_cost_per_q": round(total_cost_usd / n, 5),
+        "n_ungraded": n - len(graded),
     }

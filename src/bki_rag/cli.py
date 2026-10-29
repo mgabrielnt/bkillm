@@ -18,6 +18,7 @@ def main() -> None:
     e = sub.add_parser("eval", help="Run retrieval (+ answer) evaluation")
     e.add_argument("--answers", action="store_true", help="also generate answers and judge them")
     e.add_argument("--limit", type=int, default=None, help="evenly spread sample of N questions (cheaper)")
+    e.add_argument("--rejudge", metavar="DETAILS_FILE", help="only grade the ungraded answers in a past run")
     a = sub.add_parser("ask", help="Ask one question and print the answer")
     a.add_argument("question", nargs="+")
     a.add_argument("--debug", action="store_true")
@@ -46,8 +47,11 @@ def main() -> None:
         from .evaluation.golden import build_golden
         build_golden()
     if args.cmd == "eval":
-        from .evaluation.runner import run
-        run(answers=args.answers, limit=args.limit)
+        from .evaluation.runner import rejudge, run
+        if args.rejudge:
+            rejudge(args.rejudge)
+        else:
+            run(answers=args.answers, limit=args.limit)
     if args.cmd == "ask":
         from .app.terminal import ask_once
         ask_once(" ".join(args.question), debug=args.debug)
