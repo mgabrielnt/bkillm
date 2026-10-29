@@ -9,6 +9,8 @@ from ..prompts import JUDGE_PROMPT
 from ..retrieval.restricted import match_restricted
 
 
+# Minta juri gpt-5-nano menilai satu jawaban: kirim soal, kunci jawaban, 10 chunk sumber, dan jawaban bot.
+# Kembalikan {"refused": bool, "faithful": 0/1, "correct": 0/0.5/1, "note": alasan singkat}.
 def judge(q: dict, res: dict) -> dict[str, Any]:
     sources = "\n\n".join(
         f"[{i}] {c.get('title', '')} ({c.get('url', '')})\n{c.get('text', '')}"
@@ -23,10 +25,13 @@ def judge(q: dict, res: dict) -> dict[str, Any]:
     )}], reasoning="low")
 
 
+# Proporsi nilai True dalam daftar (dibulatkan 3 desimal); None jika daftarnya kosong.
 def _rate(flags: list[bool]) -> float | None:
     return round(sum(flags) / len(flags), 3) if flags else None
 
 
+# Tahap 2: ubah nilai juri semua soal menjadi metrik (faithfulness, correctness, penolakan, latency, biaya).
+# Soal yang gagal dijawab atau belum dinilai tidak dihitung; jumlahnya dilaporkan di n_ungraded.
 def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any]:
     answered = [d for d in details if not d.get("error")]
     graded = [d for d in answered if d.get("grade") and not d["grade"].get("error")]

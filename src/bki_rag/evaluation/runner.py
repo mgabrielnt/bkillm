@@ -32,13 +32,15 @@ def _api_error_msg(exc: Exception) -> str:
     return f"{type(exc).__name__}: {str(exc)[:200]}"
 
 
+# Pembungkus panggilan API per soal: error dicatat sebagai {"error": pesan} agar evaluasi tidak berhenti,
+# dan begitu budget habis / API key ditolak, soal berikutnya langsung dilewati tanpa memanggil API.
 class _Guard:
-    """Panggil API per soal tanpa menghentikan seluruh evaluasi; berhenti memanggil jika budget habis."""
-
+    # stop: tanda budget habis; reason: pesan penyebabnya.
     def __init__(self) -> None:
         self.stop = threading.Event()
         self.reason = ""
 
+    # Jalankan fn(*args); jika API error, kembalikan {"error": pesan} alih-alih melempar exception.
     def __call__(self, fn: Callable[..., dict], *args) -> dict:
         if self.stop.is_set():
             return {"error": self.reason}
@@ -52,8 +54,8 @@ class _Guard:
             return {"error": msg}
 
 
+# Cetak tabel metrik (hasil, target, PASS/FAIL dari catalog) lalu baris info latency dan biaya.
 def _print_core_table(all_metrics: dict[str, Any]) -> None:
-    """Cetak 1 tabel ringkas untuk metrik inti."""
     catalog_all = {**RETRIEVAL, **ANSWERS}
 
     print(f"\n{'=' * 75}")
@@ -69,6 +71,7 @@ def _print_core_table(all_metrics: dict[str, Any]) -> None:
         val_str = f"{val:.3f}" if isinstance(val, float) else str(val)
         tgt_str = f"{direction} {target}" if target is not None else "-"
 
+        # PASS/FAIL sesuai arah target: ">=" makin tinggi makin baik, "<=" makin rendah makin baik
         status = "INFO"
         if target is not None and isinstance(val, (int, float)):
             if direction == ">=":
@@ -88,6 +91,7 @@ def _print_core_table(all_metrics: dict[str, Any]) -> None:
 
 # Nilai ulang soal yang belum punya nilai juri (jawaban sudah ada di detail).
 def _grade(details: list[dict], guard: _Guard) -> None:
+    # Hanya soal yang sudah terjawab tapi belum punya nilai juri yang sah
     todo = [d for d in details if not d.get("error") and (not d.get("grade") or d["grade"].get("error"))]
     res = lambda d: {"answer": d["answer"], "chunks": d.get("chunks", [])}
     grades = pmap(lambda d: guard(judge, d, res(d)), todo, workers=8, desc="judge")
@@ -95,13 +99,15 @@ def _grade(details: list[dict], guard: _Guard) -> None:
         d["grade"] = g
 
 
+# Tahap 2: bot menjawab semua soal, juri menilai, lalu metrik dihitung. Kembalikan (metrik, detail per soal).
+# Detail menyimpan teks chunk agar --rejudge bisa menilai ulang tanpa menjawab ulang.
 def evaluate_answers(rag: RAG, golden: list[dict], guard: _Guard) -> tuple[dict, list]:
-    """Jawab pertanyaan golden set dan nilai dengan juri LLM."""
     u_before = usage()
     results = pmap(lambda q: guard(rag.answer, q["question"]), golden, workers=8, desc="answer")
     u_after = usage()
     ans_cost = cost_usd(u_before, u_after)
 
+    # Satu baris detail per soal: data golden, jawaban bot, chunk sumber, dan waktu respon
     details = []
     for q, r in zip(golden, results):
         details.append({
@@ -135,14 +141,16 @@ def _report_incomplete(details: list[dict], details_file: Path, guard: _Guard) -
         print(f"[eval] Lanjutkan penilaian saja: python -m bki_rag eval --rejudge {details_file.relative_to(C.ROOT)}")
 
 
+# Simpan ringkasan metrik ke data/eval/results/<stamp>_summary.json.
 def _save_summary(summary: dict, stamp: str) -> None:
     out_file = C.RESULTS_DIR / f"{stamp}_summary.json"
     out_file.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[eval] Ringkasan disimpan ke: {out_file.relative_to(C.ROOT)}")
 
 
+# Lanjutkan run yang terputus: nilai hanya soal yang belum dinilai di file *_answers_details.jsonl,
+# lalu hitung ulang metrik dan timpa file detail serta ringkasannya.
 def rejudge(path: str) -> None:
-    """Nilai ulang hanya soal yang belum dinilai di file *_answers_details.jsonl, lalu hitung ulang metrik."""
     details_file = Path(path) if Path(path).is_absolute() else C.ROOT / path
     details = list(read_jsonl(details_file))
     guard = _Guard()
@@ -151,6 +159,7 @@ def rejudge(path: str) -> None:
 
     summary_file = details_file.with_name(details_file.name.replace("_answers_details.jsonl", "_summary.json"))
     summary = json.loads(summary_file.read_text(encoding="utf-8")) if summary_file.exists() else {}
+    # Biaya menjawab diambil dari ringkasan lama (penilaian ulang tidak menjawab ulang)
     old_cost = summary.get("answers", {}).get("_cost_per_q", 0.0) * len(details)
     summary["answers"] = summarize(details, total_cost_usd=old_cost)
     _print_core_table({**summary.get("retrieval", {}), **summary["answers"]})
@@ -158,12 +167,12 @@ def rejudge(path: str) -> None:
     _save_summary(summary, summary.get("timestamp") or details_file.name.split("_")[0])
 
 
+# Perintah `eval`: retrieval (Tahap 1), lalu jawaban + juri (Tahap 2), cetak tabel, simpan hasil ke data/eval/results/.
 def run(
     stage: str = "all",
     limit: int | None = None,
     answers: bool = False,
 ) -> None:
-    """Jalankan evaluasi ringkas RAG."""
     C.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     summary: dict[str, Any] = {
