@@ -16,7 +16,7 @@ from ..generation.answer import RAG
 from ..retrieval.retriever import Retriever
 from .catalog import ANSWERS, RETRIEVAL
 from .golden import load_golden
-from .judge import judge, summarize
+from .judge import STAGES, judge, summarize
 from .retrieval_eval import evaluate_retrieval
 
 
@@ -82,10 +82,13 @@ def _print_core_table(all_metrics: dict[str, Any]) -> None:
         print(f"{display_name:<30} | {val_str:<10} | {tgt_str:<10} | {status:<8}")
 
     print(f"{'=' * 75}")
-    p50, p95 = all_metrics.get("_latency_p50"), all_metrics.get("_latency_p95")
+    for stage in STAGES:
+        p50, p95 = all_metrics.get(f"_{stage}_p50"), all_metrics.get(f"_{stage}_p95")
+        if p50 is not None:
+            print(f"[Waktu] {stage:<11} p50 {p50:>6.2f}s | p95 {p95:>6.2f}s")
     cost = all_metrics.get("_cost_per_q")
-    if p50 is not None or cost is not None:
-        print(f"[Info] Waktu respon p50: {p50 or 0}s, p95: {p95 or 0}s | Biaya riil: ${cost or 0:.5f} / pertanyaan")
+    if cost is not None:
+        print(f"[Info] Biaya menjawab: ${cost:.5f} / pertanyaan")
     print(f"{'=' * 75}\n")
 
 
@@ -101,9 +104,9 @@ def _grade(details: list[dict], guard: _Guard) -> None:
 
 # Tahap 2: bot menjawab semua soal, juri menilai, lalu metrik dihitung. Kembalikan (metrik, detail per soal).
 # Detail menyimpan teks chunk agar --rejudge bisa menilai ulang tanpa menjawab ulang.
-def evaluate_answers(rag: RAG, golden: list[dict], guard: _Guard) -> tuple[dict, list]:
+def evaluate_answers(rag: RAG, golden: list[dict], guard: _Guard, workers: int = 8) -> tuple[dict, list]:
     u_before = usage()
-    results = pmap(lambda q: guard(rag.answer, q["question"]), golden, workers=8, desc="answer")
+    results = pmap(lambda q: guard(rag.answer, q["question"]), golden, workers=workers, desc="answer")
     u_after = usage()
     ans_cost = cost_usd(u_before, u_after)
 
@@ -119,7 +122,7 @@ def evaluate_answers(rag: RAG, golden: list[dict], guard: _Guard) -> tuple[dict,
             "error": r.get("error"),
             "sources": r.get("sources", []),
             "chunks": [{k: c.get(k, "") for k in ("title", "url", "text")} for c in r.get("chunks", [])],
-            "latency_s": r.get("timing", {}).get("total_s", 0.0),
+            "timing": r.get("timing", {}),
         })
     _grade(details, guard)
 
@@ -172,12 +175,16 @@ def run(
     stage: str = "all",
     limit: int | None = None,
     answers: bool = False,
+    workers: int = 8,
 ) -> None:
     C.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    u_start = usage()
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     summary: dict[str, Any] = {
         "timestamp": stamp,
         "models": {"llm": C.LLM_MODEL, "embed": C.EMBED_MODEL},
+        "settings": {"answer_reasoning": C.ANSWER_REASONING, "answer_verbosity": C.ANSWER_VERBOSITY,
+                     "stream_answer": C.STREAM_ANSWER, "workers": workers},
     }
 
     run_answers = answers or stage in ("answers", "all")
@@ -200,7 +207,7 @@ def run(
     guard = _Guard()
     details_file = C.RESULTS_DIR / f"{stamp}_answers_details.jsonl"
     if run_answers:
-        ans_metrics, details = evaluate_answers(RAG(retriever), golden, guard)
+        ans_metrics, details = evaluate_answers(RAG(retriever), golden, guard, workers)
         summary["answers"] = ans_metrics
         all_table_metrics.update(ans_metrics)
         write_jsonl(details_file, details)
@@ -209,4 +216,6 @@ def run(
     _print_core_table(all_table_metrics)
     if run_answers:
         _report_incomplete(details, details_file, guard)
+    summary["cost_total_usd"] = round(cost_usd(u_start, usage()), 5)
+    print(f"[eval] Total biaya API run ini: ${summary['cost_total_usd']:.4f}")
     _save_summary(summary, stamp)

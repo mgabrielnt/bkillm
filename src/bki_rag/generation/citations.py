@@ -18,6 +18,11 @@ def normalize_citations(text: str) -> str:
     return _CITATION.sub(lambda m: "".join(f"[{n}]" for n in re.findall(r"\d+", m.group(1))), text)
 
 
+# Teks sementara selagi jawaban ditulis: nomor sitasi mentah disembunyikan sampai dirapikan di akhir.
+def hide_citations(text: str) -> str:
+    return re.sub(r"\[[^\]\n]*$", "", _CITATION.sub("", text))
+
+
 # Judul yang mudah dibaca; judul umum ("BKI | Biro Klasifikasi ...") diganti nama dari URL.
 def display_title(chunk: dict) -> str:
     title = chunk["title"].strip()

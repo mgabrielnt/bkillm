@@ -1,6 +1,7 @@
 """Stage 2: LLM-as-judge untuk faithfulness, kebenaran fakta, dan penolakan."""
 from __future__ import annotations
 
+import re
 from typing import Any
 import numpy as np
 
@@ -21,8 +22,11 @@ def judge(q: dict, res: dict) -> dict[str, Any]:
         answerable=q.get("answerable", True),
         reference=q.get("answer") or "(none)",
         sources=sources or "(no sources)",
-        answer=res.get("answer", "")
+        answer=re.sub(r"\[\d+\]", "", res.get("answer", ""))  # nomor sudah diurut ulang, tidak cocok dengan daftar ini
     )}], reasoning="low")
+
+
+STAGES = ("rewrite", "embed", "search", "first_text", "answer", "total")
 
 
 # Proporsi nilai True dalam daftar (dibulatkan 3 desimal); None jika daftarnya kosong.
@@ -57,16 +61,21 @@ def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any
     negative_rejection = _rate([refused(d) for d in unans_items])
     false_refusal = _rate([refused(d) for d in ans_items])
 
-    # Latensi dan biaya
-    latencies = [d.get("latency_s", 0.0) for d in answered]
+    # Latensi tiap tahap (soal yang langsung ke halaman login tidak memanggil model, jadi tidak dihitung)
+    timed = [d["timing"] for d in answered if d.get("timing", {}).get("first_text_s") is not None]
+    stages: dict[str, float] = {}
+    for stage in STAGES:
+        values = [t[f"{stage}_s"] for t in timed if f"{stage}_s" in t]
+        if values:
+            stages[f"_{stage}_p50"] = round(float(np.percentile(values, 50)), 3)
+            stages[f"_{stage}_p95"] = round(float(np.percentile(values, 95)), 3)
 
     return {
+        **stages,
         "faithfulness": faithfulness,
         "answer_correctness": correctness,
         "negative_rejection": negative_rejection,
         "false_refusal": false_refusal,
-        "_latency_p50": round(float(np.percentile(latencies, 50)), 2),
-        "_latency_p95": round(float(np.percentile(latencies, 95)), 2),
         "_cost_per_q": round(total_cost_usd / n, 5),
         "n_ungraded": n - len(graded),
     }

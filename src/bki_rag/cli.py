@@ -18,6 +18,7 @@ def main() -> None:
     e = sub.add_parser("eval", help="Run retrieval (+ answer) evaluation")
     e.add_argument("--answers", action="store_true", help="also generate answers and judge them")
     e.add_argument("--limit", type=int, default=None, help="evenly spread sample of N questions (cheaper)")
+    e.add_argument("--workers", type=int, default=8, help="answers at the same time; use 1 to measure real latency")
     e.add_argument("--rejudge", metavar="DETAILS_FILE", help="only grade the ungraded answers in a past run")
     a = sub.add_parser("ask", help="Ask one question and print the answer")
     a.add_argument("question", nargs="+")
@@ -51,7 +52,7 @@ def main() -> None:
         if args.rejudge:
             rejudge(args.rejudge)
         else:
-            run(answers=args.answers, limit=args.limit)
+            run(answers=args.answers, limit=args.limit, workers=args.workers)
     if args.cmd == "ask":
         from .app.terminal import ask_once
         ask_once(" ".join(args.question), debug=args.debug)

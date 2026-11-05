@@ -9,6 +9,7 @@ import streamlit as st
 
 from ...core import config as C
 from ...generation.answer import RAG
+from ...generation.citations import hide_citations
 from .errors import MISSING_KEY, friendly_error
 from .limits import DailyLimiter, session_block
 from .views import DISCLAIMER, TITLE, password_gate, show_message
@@ -30,11 +31,21 @@ def _ask(rag: RAG, question: str) -> None:
     history = [{"role": m["role"], "content": m["content"]} for m in ss.messages][-6:]
     ss.messages.append({"role": "user", "content": question})
     show_message(ss.messages[-1])
-    with st.chat_message("assistant"), st.spinner("Mencari jawaban..."):
+    with st.chat_message("assistant"):
+        box = st.empty()
+        box.caption("Mencari jawaban...")
+        parts: list[str] = []
+
+        # Tampilkan jawaban selagi ditulis; sitasi dirapikan setelah selesai.
+        def show_text(delta: str) -> None:
+            parts.append(delta)
+            box.markdown(hide_citations("".join(parts)))
+
         try:
-            res = rag.answer(question, history)
+            res = rag.answer(question, history, on_text=show_text)
         except Exception as exc:
             log.exception("answer failed")
+            box.empty()
             st.error(friendly_error(exc))
             return
     ss.messages.append({"role": "assistant", "content": res["answer"], "sources": res["sources"],

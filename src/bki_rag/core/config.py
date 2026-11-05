@@ -55,12 +55,18 @@ BASE_URL = _env("OPENAI_BASE_URL", "") or None
 LLM_MODEL = _env("LLM_MODEL", "gpt-5-nano")
 # Embedding harus sama dengan model pembuat index (data/index/meta.json), kalau tidak vektor tidak cocok.
 EMBED_MODEL = _env("EMBED_MODEL", "text-embedding-3-large")
-# Tingkat "berpikir" gpt-5-nano: jawaban sedikit lebih teliti, tugas bantu secepat mungkin.
-ANSWER_REASONING = _env("ANSWER_REASONING", "low")
+# Tingkat "berpikir" gpt-5-nano: secepat mungkin; jawaban "tidak ditemukan" dicek ulang lebih teliti.
+ANSWER_REASONING = _env("ANSWER_REASONING", "minimal")
+RETRY_REASONING = _env("RETRY_REASONING", "low")  # kosong = tanpa cek ulang
 HELPER_REASONING = _env("HELPER_REASONING", "minimal")
+ANSWER_VERBOSITY = _env("ANSWER_VERBOSITY", "")  # low/medium/high; kosong = bawaan model
+STREAM_ANSWER = _env("STREAM_ANSWER", "1") == "1"  # teks jawaban dikirim sedikit demi sedikit
+# 0 = pertanyaan tanpa riwayat chat langsung dicari (lebih cepat); pertanyaan lanjutan selalu di-rewrite.
+REWRITE_FIRST_QUESTION = _env("REWRITE_FIRST_QUESTION", "0") == "1"
 # Harga per 1 juta token (USD) untuk menghitung biaya di evaluasi: gpt-5-nano input/output, embedding large.
 PRICE_PER_1M_TOKENS = {"llm_in": 0.05, "llm_out": 0.40, "embed": 0.13}
 LLM_CONCURRENCY = int(_env("LLM_CONCURRENCY", "16"))
+QUERY_EMBED_TIMEOUT_S = float(_env("QUERY_EMBED_TIMEOUT_S", "2"))  # embedding pertanyaan yang tersendat diulang cepat
 
 # --- Parameter pipeline --------------------------------------------------------
 CHUNK_TARGET_TOKENS = int(_env("CHUNK_TARGET_TOKENS", "500"))

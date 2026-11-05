@@ -14,6 +14,11 @@ def detect_lang(text: str) -> str:
         return "en"
 
 
+# Pertanyaan tanpa riwayat dicari apa adanya, tanpa memanggil model; bahasanya dideteksi secara lokal.
+def plain_query(question: str) -> dict:
+    return {"standalone": question, "lang": detect_lang(question)}
+
+
 # Mengembalikan {"standalone", "en", "id", "keywords", "lang"}; aman jika JSON dari model rusak.
 def rewrite_query(question: str, history: list[dict] | None = None) -> dict:
     hist = "\n".join(f"{m['role']}: {m['content'][:600]}" for m in (history or [])[-6:]) or "(none)"
