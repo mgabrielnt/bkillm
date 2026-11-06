@@ -1,4 +1,4 @@
-# BKI RAG Chatbot
+﻿# BKI RAG Chatbot
 
 Chatbot tanya-jawab atas konten publik **bki.co.id** (PT Biro Klasifikasi Indonesia): halaman situs, berita,
 halaman ESG, dan laporan tahunan/keberlanjutan. Setiap jawaban disertai sumbernya. Tersedia sebagai UI web
@@ -109,7 +109,7 @@ bki/
 │   ├── indexing/             Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py, export.py
 │   ├── retrieval/            Tahap 6a: restricted.py, query.py, retriever.py
 │   ├── generation/           Tahap 6b: sources.py, reply.py, citations.py, answer.py
-│   ├── evaluation/           golden.py, retrieval_eval.py, judge.py, guard.py, report.py, runner.py
+│   ├── evaluation/           golden.py, retrieval_eval.py, answer_eval.py, judge.py, guard.py, report.py, runner.py
 │   └── app/                  terminal.py dan web/ (page.py, views.py, limits.py, errors.py)
 └── data/
     ├── index/                index yang dipakai aplikasi (di-commit, ±34 MB)

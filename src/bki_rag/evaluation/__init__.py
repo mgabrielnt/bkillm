@@ -2,11 +2,12 @@
 
   catalog/           metrics definitions (Stage 1 retrieval, Stage 2 answers)
   retrieval_eval.py  Stage 1: Hit@10, MRR@10 (cheap)
+  answer_eval.py     Stage 2: bot answers, judge grades, metrics (also --rejudge)
   judge.py           Stage 2: LLM judge for faithfulness, correctness, refusals; latency & cost
   golden.py          golden test set generation
   guard.py           keeps the run alive when the API fails (errors recorded per question)
   report.py          prints the metrics table and saves the summary file
-  runner.py          orchestrator: retrieval, answers, judge, results
+  runner.py          `eval` command: runs stage 1, then stage 2, prints and saves results
 """
 from .catalog import ANSWERS, RETRIEVAL, STAGES
 from .golden import build_golden, load_golden

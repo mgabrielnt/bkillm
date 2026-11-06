@@ -1,4 +1,4 @@
-# Panduan pengembangan
+﻿# Panduan pengembangan
 
 Untuk siapa pun yang melanjutkan proyek ini. Baca [README.md](../README.md) dulu untuk gambaran dan cara
 menjalankan, lalu [alur-pertanyaan.md](alur-pertanyaan.md) untuk memahami kode.
@@ -6,7 +6,7 @@ menjalankan, lalu [alur-pertanyaan.md](alur-pertanyaan.md) untuk memahami kode.
 ## Konvensi kode
 
 - **Satu tugas per file, file pendek** (sekitar 100 baris). Kalau file membesar, pecah (contoh: `generation/reply.py`
-  dipisah dari `answer.py`, `evaluation/report.py` dan `guard.py` dari `runner.py`).
+  dipisah dari `answer.py`, `evaluation/answer_eval.py`, `report.py`, dan `guard.py` dari `runner.py`).
 - **Setiap folder punya `__init__.py`** dengan docstring yang menjelaskan isinya. Perbarui saat menambah file.
 - **Setiap fungsi dan class diberi komentar `#` Bahasa Indonesia tepat di atas `def`/`class`**, satu atau dua
   baris tentang *apa yang dilakukan*. Docstring modul memakai Bahasa Inggris.
