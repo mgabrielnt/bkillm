@@ -1,6 +1,6 @@
 """Contextual retrieval: a short, bilingual description of where each chunk sits in its document.
 
-Results are cached by chunk content hash (data/cache/context_<model>.jsonl) and appended as they arrive,
+Results are cached by chunk content hash (data/cache/context.jsonl) and appended as they arrive,
 so an interrupted run resumes where it stopped and re-runs only pay for new chunks.
 """
 from __future__ import annotations
@@ -9,8 +9,8 @@ import json
 import threading
 
 from ..core import config as C
-from ..core.llm import chat, pmap
-from ..core.utils import read_jsonl, truncate_tokens
+from ..core.llm import chat
+from ..core.utils import pmap, read_jsonl, truncate_tokens
 from ..prompts import CONTEXT_PROMPT, GLOSSARY
 
 

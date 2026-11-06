@@ -9,8 +9,8 @@ import random
 from collections import defaultdict
 
 from ..core import config as C
-from ..core.llm import chat_json, pmap
-from ..core.utils import read_jsonl, write_jsonl
+from ..core.llm import chat_json
+from ..core.utils import pmap, read_jsonl, write_jsonl
 from ..prompts import GOLDEN_PROMPT, GOLDEN_STYLES
 
 STRATA = {  # doc_type -> jumlah pertanyaan

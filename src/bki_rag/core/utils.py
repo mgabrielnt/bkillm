@@ -1,15 +1,21 @@
-"""Small shared helpers: JSONL IO, hashing, token counting, text normalisation."""
+"""Small shared helpers: JSONL IO, hashing, token counting, text normalisation, parallel map."""
 from __future__ import annotations
 
 import hashlib
 import json
 import re
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Callable, Iterable, Iterator, TypeVar
 
 import tiktoken
+
+from . import config as C
+
+T = TypeVar("T")
+R = TypeVar("R")
 
 
 # Baca file JSONL, satu dict per baris.
@@ -68,3 +74,18 @@ def normalize_text(text: str) -> str:
     text = re.sub(r" *\n *", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+# Jalankan fn untuk setiap item secara paralel (thread), urutan hasil sama dengan input.
+def pmap(fn: Callable[[T], R], items: Iterable[T], workers: int = C.LLM_CONCURRENCY, desc: str = "") -> list[R]:
+    items = list(items)
+    results: list[R] = [None] * len(items)  # type: ignore[list-item]
+    done = 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = {ex.submit(fn, it): i for i, it in enumerate(items)}
+        for fut in futures:
+            results[futures[fut]] = fut.result()
+            done += 1
+            if desc and (done % 50 == 0 or done == len(items)):
+                print(f"  {desc}: {done}/{len(items)}", flush=True)
+    return results

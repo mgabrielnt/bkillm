@@ -4,7 +4,9 @@
   retrieval_eval.py  Stage 1: Hit@10, MRR@10 (cheap)
   judge.py           Stage 2: LLM judge for faithfulness, correctness, refusals; latency & cost
   golden.py          golden test set generation
-  runner.py          unified orchestrator and results exporter
+  guard.py           keeps the run alive when the API fails (errors recorded per question)
+  report.py          prints the metrics table and saves the summary file
+  runner.py          orchestrator: retrieval, answers, judge, results
 """
 from .catalog import ANSWERS, RETRIEVAL, STAGES
 from .golden import build_golden, load_golden

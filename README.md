@@ -1,131 +1,143 @@
 # BKI RAG Chatbot
 
-Chatbot tanya-jawab atas konten publik **bki.co.id** (PT Biro Klasifikasi Indonesia): situs, berita, halaman ESG,
-dan laporan tahunan/keberlanjutan. Setiap jawaban disertai link sumbernya. Tersedia sebagai UI web (Streamlit)
-dan chatbot terminal. Model dipanggil lewat API yang kompatibel dengan OpenAI (saat ini gateway SumoPod).
+Chatbot tanya-jawab atas konten publik **bki.co.id** (PT Biro Klasifikasi Indonesia): halaman situs, berita,
+halaman ESG, dan laporan tahunan/keberlanjutan. Setiap jawaban disertai sumbernya. Tersedia sebagai UI web
+(Streamlit) dan chatbot terminal.
 
-Hanya dua model yang dipakai:
+| Dokumen | Isi |
+|---|---|
+| **README.md** (ini) | Gambaran, cara menjalankan, konfigurasi, struktur folder, deploy |
+| [docs/alur-pertanyaan.md](docs/alur-pertanyaan.md) | Apa yang terjadi di kode untuk satu pertanyaan, langkah demi langkah |
+| [docs/pembuatan-data.md](docs/pembuatan-data.md) | Dari situs sampai index: crawl, ekstraksi, pembersihan, chunking, indexing |
+| [docs/pengembangan.md](docs/pengembangan.md) | Konvensi kode, cara menambah fitur, evaluasi, pemecahan masalah |
+
+## Cara kerja singkat
+
+```
+ Data (dibuat sekali)                          Setiap pertanyaan
+ ─────────────────────                         ─────────────────
+ bki.co.id ─► crawl ─► extract ─► clean        pertanyaan
+              ─► chunk ─► index                   │ topik rules/regulasi? ─► link login (tanpa API)
+              (data/index/)                       ▼
+                    │                          rewrite* ─► embedding ─► vektor + BM25 ─► RRF ─► 10 chunk
+                    └── dibaca saat start ──►                                                   │
+                                               model menjawab dari 10 chunk, dengan sitasi [n] ◄┘
+                                                  │
+                                               sitasi dirapikan ─► jawaban + daftar sumber
+```
+
+\* Rewrite pertanyaan hanya untuk pertanyaan lanjutan (ada riwayat chat). Pertanyaan pertama langsung dicari.
+
+Hanya dua model, keduanya lewat API yang kompatibel dengan OpenAI:
 
 | Model | Untuk |
 |---|---|
-| `gpt-5-nano` | semua tugas teks: jawaban, rewrite pertanyaan, konteks chunk, evaluasi |
-| `text-embedding-3-large` | embedding (multilingual EN/ID) |
+| `gpt-5-nano` | semua tugas teks: jawaban, rewrite pertanyaan, konteks chunk, juri evaluasi |
+| `text-embedding-3-large` | embedding (EN/ID). **Harus sama dengan model pembuat index** (`data/index/meta.json`) |
 
-Pencarian menggabungkan embedding dan BM25 (kata persis) dengan Reciprocal Rank Fusion.
+Pencarian menggabungkan kemiripan makna (embedding) dan kata persis (BM25) dengan Reciprocal Rank Fusion.
+Tidak ada reranker.
 
-**Biaya terukur** (tagihan nyata SumoPod): rata-rata **$0,0006 (±Rp10) per pertanyaan**; ±Rp10.000 per 1.000
-pertanyaan. Sebagian besar untuk membaca 10 potongan sumber (±6.900 token input) dan token "berpikir" model,
-bukan panjang pertanyaan/jawaban.
+## Menjalankan
 
-## Struktur folder
-
-Aturan: setiap file maksimal 100 baris, satu tugas per file, setiap fungsi punya komentar singkat Bahasa Indonesia
-tepat di atas `def`/`class`, dan setiap folder punya `__init__.py` yang menjelaskan isinya.
-
-```
-bki/
-├── streamlit_app.py              # pembuka UI web (isi halaman ada di src/bki_rag/app/web/)
-├── requirements.txt              # paket runtime (dipakai Streamlit Cloud)
-├── pyproject.toml                # paket bki_rag; extras: [web], [ingest]
-├── .env.example                  # contoh konfigurasi lokal (.env tidak di-commit)
-├── .streamlit/                   # config.toml (aman untuk publik) + contoh Secrets
-├── src/bki_rag/
-│   ├── cli.py                    # python -m bki_rag <perintah>
-│   ├── core/                     # dasar bersama
-│   │   ├── config.py             #   path, 2 model, parameter (bisa diubah lewat .env / Secrets)
-│   │   ├── llm.py                #   client OpenAI-compatible: chat, JSON, embedding, retry
-│   │   └── utils.py              #   JSONL, hash, hitung token, normalisasi teks
-│   ├── prompts/                  # SEMUA prompt, satu file per tahap
-│   │   ├── indexing.py           #   konteks chunk + glosarium
-│   │   ├── retrieval.py          #   rewrite pertanyaan
-│   │   ├── answer.py             #   system prompt chatbot
-│   │   └── evaluation.py         #   golden set + juri
-│   ├── ingestion/                # Tahap 1-4: situs -> chunk bersih
-│   │   ├── crawl/                #   fetcher.py, cms.py, site.py, pdfs.py
-│   │   ├── extract/              #   rsc.py, rsc_text.py, i18n.py, urls.py, pages.py, tiptap.py, cms.py, pdf.py
-│   │   ├── clean/                #   filters.py (boilerplate), dedup.py (exact + MinHash)
-│   │   ├── chunk/                #   units.py (paragraf, split), chunker.py (packing + metadata)
-│   │   └── pipeline.py           #   perintah `process`
-│   ├── indexing/                 # Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py
-│   ├── retrieval/                # Tahap 6a: restricted.py, query.py, retriever.py
-│   ├── generation/               # Tahap 6b: sources.py, citations.py, answer.py
-│   ├── evaluation/               # golden.py, retrieval_eval.py, judge.py, runner.py
-│   └── app/
-│       ├── terminal.py           #   chatbot terminal (`chat` / `ask`)
-│       └── web/                  #   page.py, views.py, limits.py, errors.py (Streamlit)
-└── data/
-    ├── index/                    # index yang dipakai aplikasi (di-commit, ±34 MB)
-    ├── processed/                # dokumen & chunk bersih + laporan pembersihan
-    ├── eval/                     # golden.jsonl (hasil evaluasi ditulis ke eval/results/)
-    ├── raw/                      # hasil crawl mentah (lokal saja)
-    └── cache/                    # cache berbayar: konteks, embedding, parsing PDF (lokal saja)
-```
-
-`data/raw/` dan `data/cache/` tidak ada di GitHub, tapi **jangan dihapus di lokal**: isinya membuat proses ulang
-gratis (konteks dan embedding 1.840 chunk sudah dibayar).
-
-## Cara pakai (lokal, PowerShell)
+Persiapan (PowerShell):
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[web,ingest]"
-copy .env.example .env      # isi OPENAI_API_KEY
+copy .env.example .env      # isi OPENAI_API_KEY (dan OPENAI_BASE_URL bila memakai gateway)
 ```
 
+Memakai chatbot (index sudah ada di `data/index/`, tidak perlu crawl):
+
 ```powershell
-streamlit run streamlit_app.py   # UI web di http://localhost:8501
-python -m bki_rag chat           # chatbot terminal (/debug, /reset, /exit)
+streamlit run streamlit_app.py                        # UI web di http://localhost:8501
+python -m bki_rag chat                                # terminal interaktif (/debug, /reset, /exit)
 python -m bki_rag ask "Berapa lama sertifikat garis muat berlaku?"
 ```
 
-Membangun ulang data (hanya bila situs berubah):
+Membangun ulang data (hanya bila isi situs berubah; detail di [docs/pembuatan-data.md](docs/pembuatan-data.md)):
 
 ```powershell
-python -m bki_rag crawl     # ±3 menit, sopan 1 request/detik
+python -m bki_rag crawl     # unduh situs, CMS, PDF (±3 menit, 1 request/detik)
 python -m bki_rag process   # ekstraksi, pembersihan, chunking (gratis)
-python -m bki_rag index     # konteks + embedding; hanya chunk baru/berubah yang dibayar
+python -m bki_rag index     # konteks + embedding + BM25; hanya chunk baru/berubah yang dibayar
 ```
 
-Evaluasi (berbayar; `--limit` = sampel kecil yang murah):
+Evaluasi dan pemeriksaan (detail di [docs/pengembangan.md](docs/pengembangan.md)):
 
 ```powershell
-python -m bki_rag eval --answers --limit 30
+python -m bki_rag eval --answers --limit 30 --workers 1   # berbayar; --workers 1 = waktu akurat
+python -m bki_rag vectors                                 # lihat isi index (gratis)
 ```
 
-## Halaman yang butuh login
+## Konfigurasi
 
-Semua pertanyaan tentang **rules dan regulasi** langsung diarahkan ke
-https://www.bki.co.id/research/rnd/bki-rules-regulations (halaman yang butuh login), **tanpa pencarian apa pun**:
-tidak ada embedding, tidak ada retrieval, dan tidak ada panggilan model, jadi biayanya nol.
+Semua pengaturan ada di [src/bki_rag/core/config.py](src/bki_rag/core/config.py) dan bisa diubah lewat `.env`
+(lokal) atau Streamlit Secrets (cloud). Contoh lengkap: [.env.example](.env.example).
 
-Deteksinya (`retrieval/restricted.py`) cukup mencocokkan kata kunci di pertanyaan: rule(s), regulation(s) /
-regulatory, aturan, peraturan, regulasi, ketentuan, pedoman, guideline(s), guidance, standar teknis, technical
-standard, termasuk bentuk berakhiran seperti "peraturannya" atau "aturan-aturan". Balasan memakai bahasa penanya.
-Uji 19 pertanyaan campuran: 19/19 benar. Untuk menambah halaman login lain, tambahkan `RestrictedPage` baru ke
-`RESTRICTED_PAGES`.
+| Pengaturan | Bawaan | Artinya |
+|---|---|---|
+| `OPENAI_API_KEY` | – | **Wajib.** Hanya dari env/Secrets, tidak pernah ditampilkan |
+| `OPENAI_BASE_URL` | kosong | Kosong = api.openai.com; isi untuk gateway lain |
+| `ANSWER_REASONING` | `minimal` | Seberapa lama model "berpikir" saat menjawab. `low` = lebih teliti, lebih lambat |
+| `RETRY_REASONING` | `low` | Jawaban "tidak ditemukan" diulang dengan tingkat ini (kosong = tidak diulang) |
+| `STREAM_ANSWER` | `1` | Jawaban tampil sedikit demi sedikit |
+| `REWRITE_FIRST_QUESTION` | `0` | `1` = pertanyaan pertama juga di-rewrite (lebih lambat) |
+| `QUERY_EMBED_TIMEOUT_S` | `2` | Embedding pertanyaan yang tersendat lebih dari ini diulang |
+| `TOP_K` | `10` | Jumlah chunk yang dikirim ke model jawaban |
+| `APP_PASSWORD` | kosong | Isi agar UI web butuh kata sandi |
+| `DAILY_QUESTION_LIMIT` | `200` | Batas pertanyaan per hari, semua pengguna digabung |
+| `SESSION_QUESTION_LIMIT` | `30` | Batas pertanyaan per sesi pengunjung |
 
-## Melihat isi vektor embedding
+## Struktur folder
 
-Vektor tersimpan di `data/index/`:
+```
+bki/
+├── streamlit_app.py          pembuka UI web (isi halaman di src/bki_rag/app/web/)
+├── requirements.txt          paket runtime (dipakai Streamlit Cloud)
+├── pyproject.toml            paket bki_rag; extras: [web], [ingest]
+├── .env.example              contoh konfigurasi (.env tidak di-commit)
+├── .streamlit/               config.toml (aman untuk publik) + contoh Secrets
+├── docs/                     dokumentasi (lihat tabel di atas)
+├── src/bki_rag/
+│   ├── cli.py                python -m bki_rag <perintah>
+│   ├── core/                 dasar bersama: config.py, llm.py, usage.py, utils.py
+│   ├── prompts/              SEMUA prompt, satu file per tahap
+│   ├── ingestion/            Tahap 1-4: crawl/ extract/ clean/ chunk/ + pipeline.py
+│   ├── indexing/             Tahap 5: contextualize.py, store.py, pipeline.py, inspect.py, export.py
+│   ├── retrieval/            Tahap 6a: restricted.py, query.py, retriever.py
+│   ├── generation/           Tahap 6b: sources.py, reply.py, citations.py, answer.py
+│   ├── evaluation/           golden.py, retrieval_eval.py, judge.py, guard.py, report.py, runner.py
+│   └── app/                  terminal.py dan web/ (page.py, views.py, limits.py, errors.py)
+└── data/
+    ├── index/                index yang dipakai aplikasi (di-commit, ±34 MB)
+    ├── processed/            dokumen & chunk bersih + laporan pembersihan
+    ├── eval/                 golden.jsonl; hasil evaluasi di eval/results/
+    ├── raw/                  hasil crawl mentah (hanya lokal)
+    └── cache/                cache berbayar: konteks, embedding, parsing PDF (hanya lokal)
+```
+
+`data/raw/` dan `data/cache/` tidak ada di GitHub, tetapi **jangan dihapus di lokal**: isinya membuat proses ulang
+gratis (konteks dan embedding sudah dibayar).
+
+File di `data/index/` yang dibaca aplikasi:
 
 | File | Isi |
 |---|---|
-| `embeddings.npy` | matriks float32 1840 × 3072 (`text-embedding-3-large`); satu baris = satu chunk, sudah dinormalisasi (panjang 1) sehingga dot product = cosine similarity |
-| `chunks.jsonl` | teks + metadata tiap chunk, urutannya sama dengan baris matriks (baris i = baris ke-i file ini) |
-| `meta.json` | model embedding dan jumlah chunk |
-| `bm25/` | index kata kunci (BM25) untuk chunk yang sama |
+| `chunks.jsonl` | teks + metadata tiap chunk (baris ke-i = vektor baris ke-i) |
+| `embeddings.npy` | matriks float32 (jumlah chunk × 3072), sudah dinormalisasi |
+| `bm25/` | index kata kunci |
+| `meta.json` | nama model embedding dan jumlah chunk |
 
-Cara membukanya (gratis, tanpa API):
+## Halaman yang butuh login
 
-```powershell
-python -m bki_rag vectors                                  # info index + vektor chunk pertama + chunk termirip
-python -m bki_rag vectors --chunk service-13d66e12-000     # chunk tertentu (id dari chunks.jsonl)
-python -m bki_rag vectors --export vektor.csv --rows 20    # 20 vektor lengkap ke CSV (buka di Excel)
-python -m bki_rag vectors --query "masa berlaku sertifikat garis muat"   # cari dengan teks (biaya ±Rp0,03)
-```
-
-Atau langsung di Python: `numpy.load("data/index/embeddings.npy")`.
+Pertanyaan tentang **rules dan regulasi** langsung dijawab dengan link
+https://www.bki.co.id/research/rnd/bki-rules-regulations (halaman itu butuh login), tanpa embedding, tanpa
+pencarian, tanpa panggilan model. Deteksinya pencocokan kata kunci di
+[retrieval/restricted.py](src/bki_rag/retrieval/restricted.py). Untuk menambah halaman login lain, tambahkan
+`RestrictedPage` baru ke `RESTRICTED_PAGES`.
 
 ## Deploy (Streamlit Community Cloud)
 
@@ -136,36 +148,43 @@ Atau langsung di Python: `numpy.load("data/index/embeddings.npy")`.
    OPENAI_API_KEY = "sk-..."
    OPENAI_BASE_URL = "https://ai.sumopod.com/v1"
    ```
-4. Pasang batas belanja di dashboard SumoPod sebagai pengaman kedua.
+4. Pasang batas belanja di dashboard penyedia API sebagai pengaman kedua.
 
-Pengaman di aplikasi: API key hanya dari Secrets/env; batas 200 pertanyaan/hari untuk semua pengguna
-(`DAILY_QUESTION_LIMIT`, reset bila server restart); per sesi maks 30 pertanyaan, jeda 3 detik, maks 500 karakter;
-jawaban dirender tanpa HTML; error ditampilkan tanpa detail teknis; `APP_PASSWORD` opsional; keterangan bahwa ini
-bukan kanal resmi BKI.
+Pengaman di aplikasi: API key hanya dari Secrets/env; 200 pertanyaan/hari untuk semua pengguna (hitungannya
+reset bila server restart); per sesi maksimal 30 pertanyaan, jeda 3 detik, 500 karakter; jawaban dirender tanpa
+HTML; error ditampilkan tanpa detail teknis; `APP_PASSWORD` opsional; ada keterangan bahwa ini bukan kanal resmi BKI.
 
-## Alur data
+## Hasil evaluasi terakhir
 
-1. **Crawl** (`ingestion/crawl/`). bki.co.id adalah aplikasi Next.js di belakang WAF dengan CMS Strapi publik
-   (`cms.bki.co.id/api`). Berita (EN 80 + ID 73), artikel, event, 58 halaman ESG (EN+ID), lowongan, dan daftar
-   laporan diambil dari API JSON. Halaman statis diambil sebagai HTML dengan User-Agent jujur; halaman login
-   dilewati; tidak ada upaya mengakali WAF. 22 URL "R&D activities" di sitemap ternyata halaman kosong.
-2. **Ekstraksi** (`ingestion/extract/`). Teks halaman statis ada di kamus i18n dalam payload React Server
-   Components (EN) dan `/locales/id/common.json` (ID); tiap namespace jadi satu dokumen dengan URL-nya. PDF
-   (laporan tahunan 2024 & 2023, laporan keberlanjutan 2024, kebijakan HSE) diparse per halaman untuk sitasi.
-3. **Pembersihan** (`ingestion/clean/`). Filter boilerplate dua bahasa, filter frekuensi lintas dokumen,
-   header/footer PDF, normalisasi Unicode, dedup exact + MinHash, buang dokumen < 50 kata.
-4. **Chunking** (`ingestion/chunk/`). Per heading, ±500 token, tabel utuh, breadcrumb di awal tiap chunk.
-5. **Indexing** (`indexing/`). Tiap chunk diberi 1-3 kalimat konteks dua bahasa, lalu di-embed dan masuk BM25.
-6. **Retrieval + jawaban** (`retrieval/`, `generation/`). Pertanyaan ditulis ulang (mandiri + EN + ID + kata
-   kunci), dicari dengan vektor dan BM25, digabung RRF; 10 chunk teratas diberi label "halaman situs aktif" atau
-   "laporan tahun X", lalu model menjawab hanya dari sumber, bersitasi, dalam bahasa penanya, atau menolak.
+Golden set: 123 pertanyaan (`data/eval/golden.jsonl`), termasuk pertanyaan jebakan yang harus ditolak.
+Hasil run 60 soal dengan pengaturan bawaan sekarang (`--workers 1`):
 
-## Hasil evaluasi
+| Metrik | Hasil | Target |
+|---|---|---|
+| Dokumen benar ada di 10 teratas (Hit@10) | 1,00 | ≥ 0,95 |
+| Urutan dokumen (MRR@10) | 0,88 | ≥ 0,70 |
+| Bebas halusinasi | 0,98 | ≥ 0,90 |
+| Kebenaran fakta | 0,98 | ≥ 0,80 |
+| Menolak soal jebakan | 1,00 | ≥ 0,90 |
+| Salah menolak | 0,00 | ≤ 0,10 |
+| Waktu teks pertama muncul (p50 / p95) | 1,9 s / 5,0 s | – |
+| Waktu jawaban selesai (p50 / p95) | 2,5 s / 6,5 s | – |
+| Biaya menjawab | ±$0,0004 / pertanyaan | – |
 
-Golden set (`data/eval/golden.jsonl`): 103 pertanyaan dari 12 tipe dokumen (60% pendek gaya chat, ±50% lintas
-bahasa) + 20 pertanyaan jebakan yang harus ditolak. Pencarian menemukan dokumen yang benar di 10 teratas untuk
-99% pertanyaan. Kualitas jawaban `gpt-5-nano` baru diuji manual; untuk mengukurnya jalankan
-`python -m bki_rag eval --answers --limit 30` (berbayar, ±Rp5.000).
+Hasil run seluruh 123 soal: Hit@10 0,98, MRR@10 0,85, bebas halusinasi 0,99, kebenaran fakta 0,99, menolak soal
+jebakan 0,95, waktu jawaban selesai p50 2,8 s. Angka bisa bergeser antar run karena model tidak deterministik.
 
-Catatan terbuka: perbaikan halaman Company Profile (visi-misi terbaru, biografi direksi) sudah ada di
-`data/processed/`, tetapi 34 chunk-nya belum masuk `data/index/` (perlu `python -m bki_rag index`, ±Rp200).
+## Keterbatasan yang diketahui
+
+- **Kecepatan:** tidak semua jawaban di bawah 3 detik (±73% teks pertama, ±60% jawaban lengkap). Pertanyaan
+  lanjutan lebih lambat karena di-rewrite oleh model.
+- **Angka di tabel:** dengan `ANSWER_REASONING=minimal`, model kadang melewatkan angka di tabel; jawaban
+  "tidak ditemukan" sudah diulang dengan `low`, tetapi belum sempurna. Bila akurasi lebih penting daripada
+  kecepatan, set `ANSWER_REASONING=low`.
+- **Index belum mutakhir:** `data/processed/` memuat 34 chunk (halaman Company Profile: visi-misi terbaru,
+  biografi direksi) yang belum masuk `data/index/`. Jalankan `python -m bki_rag index` (biaya kecil) untuk
+  memasukkannya.
+- **Bahasa jawaban:** untuk pertanyaan pertama, bahasa ditentukan detektor lokal berbasis kata penanda
+  (`ID_MARKERS`), bukan oleh model; pertanyaan campuran yang tidak memuat penanda bisa dijawab dalam bahasa yang
+  tidak diinginkan.
+- **Konten login:** BKI Rules & Regulations tidak bisa dijawab; pengguna diarahkan ke halaman login.

@@ -29,10 +29,6 @@ class DailyLimiter:
         except (OSError, ValueError):
             return {}
 
-    # Jumlah pertanyaan yang sudah diajukan hari ini.
-    def used_today(self) -> int:
-        return int(self._read().get(date.today().isoformat(), 0))
-
     # Hitung satu pertanyaan; False jika batas hari ini sudah tercapai.
     def try_consume(self) -> bool:
         with self._lock:

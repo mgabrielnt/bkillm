@@ -46,7 +46,11 @@ def summarize(details: list[dict], total_cost_usd: float = 0.0) -> dict[str, Any
     # Soal Rules & Regulations sengaja dialihkan ke halaman login, jadi tidak dinilai sebagai jawaban
     ans_items = [d for d in graded if d.get("answerable") and not match_restricted(d["question"])]
     unans_items = [d for d in graded if not d.get("answerable")]
-    refused = lambda d: bool(d.get("grade", {}).get("refused"))
+
+    # True jika juri menilai jawaban ini sebagai penolakan.
+    def refused(d: dict) -> bool:
+        return bool(d.get("grade", {}).get("refused"))
+
     non_refused = [d for d in ans_items if not refused(d)]
 
     # 1. Faithfulness (bebas halusinasi), hanya jawaban yang berisi klaim

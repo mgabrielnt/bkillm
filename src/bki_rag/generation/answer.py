@@ -6,26 +6,19 @@
 """
 from __future__ import annotations
 
-import re
 import time
 from typing import Callable
 
-from ..core import config as C
-from ..core.llm import chat, chat_stream
 from ..prompts import ANSWER_SYSTEM_PROMPT, ANSWER_USER_PROMPT
 from ..retrieval.query import detect_lang
 from ..retrieval.restricted import RestrictedPage, match_restricted, restricted_reply
 from ..retrieval.retriever import Retriever
 from .citations import renumber_citations
+from .reply import reply
 from .sources import build_context
 
 LANG_NAMES = {"id": "Indonesian", "en": "English"}
 HISTORY_TURNS = 6  # pesan riwayat chat terakhir yang ikut dikirim ke model
-# Tanda penolakan di awal jawaban (lihat aturan 3 di prompt jawaban).
-REFUSAL = re.compile(r"^(maaf|sorry)|tidak (ditemukan|ada|tersedia|disebut|mencantumkan)|no specific|"
-                     r"not (found|available|mentioned|stated|provided|specified)|"
-                     r"(do|does) not (include|contain|provide|mention|state|specify)", re.I)
-HOLD_CHARS = 60  # huruf pertama yang ditahan sebelum tampil, supaya penolakan bisa dicek ulang
 
 
 # Bentuk hasil yang sama untuk semua jalur: jawaban, sumber, chunk, info pertanyaan, dan waktu proses.
@@ -33,40 +26,6 @@ def _result(answer: str, sources: list[dict], chunks: list[dict], query: dict, r
             timing: dict) -> dict:
     return {"answer": answer, "sources": sources, "chunks": chunks, "query": query, "ranking": ranking,
             "timing": timing}
-
-
-# Tanya model satu kali. Mengembalikan (teks, waktu teks pertama), atau None jika drop_refusal aktif dan
-# jawabannya penolakan. Beberapa huruf pertama ditahan agar penolakan itu tidak sempat tampil di layar.
-def _ask_model(messages: list[dict], reasoning: str, on_text: Callable[[str], None] | None,
-               drop_refusal: bool) -> tuple[str, float] | None:
-    args = {"reasoning": reasoning, "verbosity": C.ANSWER_VERBOSITY}
-    deltas = chat_stream(messages, **args) if C.STREAM_ANSWER else [chat(messages, **args)]
-    show = on_text or (lambda _: None)
-    text, first = "", 0.0
-    held = True
-    for delta in deltas:
-        text += delta
-        if not held:
-            show(delta)
-        elif len(text) >= HOLD_CHARS:
-            if drop_refusal and REFUSAL.search(text):
-                return None
-            held = False
-            first = time.time()
-            show(text)
-    if held:
-        if drop_refusal and REFUSAL.search(text):
-            return None
-        first = time.time()
-        show(text)
-    return text, first
-
-
-# Jawaban cepat dulu; penolakan dicek ulang lebih teliti karena model cepat bisa melewatkan isi tabel.
-def _reply(messages: list[dict], on_text: Callable[[str], None] | None) -> tuple[str, float]:
-    retry = C.RETRY_REASONING if C.RETRY_REASONING != C.ANSWER_REASONING else ""
-    return (_ask_model(messages, C.ANSWER_REASONING, on_text, bool(retry))
-            or _ask_model(messages, retry, on_text, False))
 
 
 # Pesan untuk model jawaban: aturan (system), riwayat chat singkat, lalu sumber + pertanyaan.
@@ -97,9 +56,9 @@ class RAG:
         found = self.retriever.search(question, history)
         t1 = time.time()
         chunks, query = found["chunks"], found["query"]
-        reply, t_first = _reply(_messages(question, query, chunks, history), on_text)
+        text_raw, t_first = reply(_messages(question, query, chunks, history), on_text)
         t2 = time.time()
-        text, sources = renumber_citations(reply, chunks)
+        text, sources = renumber_citations(text_raw, chunks)
         timing = {**found["timing"], "retrieval_s": round(t1 - t0, 3), "first_text_s": round(t_first - t0, 3),
                   "answer_s": round(t2 - t1, 3), "total_s": round(time.time() - t0, 3)}
         return _result(text, sources, chunks, query, found["ranking"], timing)

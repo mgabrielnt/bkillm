@@ -1,13 +1,23 @@
 """Query understanding: standalone question (chat history resolved) + English/Indonesian variants + keywords."""
 from __future__ import annotations
 
+import re
+
+from langdetect import detect
+
 from ..core.llm import chat_json
 from ..prompts import REWRITE_PROMPT
+
+# Kata yang hampir pasti Bahasa Indonesia. Pertanyaan pendek seperti "Apa itu Port State Control?" berisi istilah
+# Inggris, sehingga langdetect saja menebaknya sebagai Inggris dan jawaban keluar dalam bahasa yang salah.
+ID_MARKERS = frozenset("""apa itu ini yang dan berapa siapa bagaimana kapan dimana mengapa kenapa adalah saja untuk
+dengan dari apakah bisa pada atau tidak saya kami di oleh sebagai agar jelaskan sebutkan""".split())
 
 
 # Deteksi bahasa pertanyaan: 'id' atau 'en' (bahasa Inggris jika ragu).
 def detect_lang(text: str) -> str:
-    from langdetect import detect
+    if ID_MARKERS & set(re.findall(r"[a-z]+", text.lower())):
+        return "id"
     try:
         return "id" if detect(text) in ("id", "ms") else "en"
     except Exception:

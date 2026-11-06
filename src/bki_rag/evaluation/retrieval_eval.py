@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import Any
-from ..core.llm import pmap
+from ..core.utils import pmap
 from ..retrieval.restricted import match_restricted
 from ..retrieval.retriever import Retriever
 
