@@ -12,7 +12,8 @@ from ...generation.answer import RAG
 from ...generation.citations import hide_citations
 from .errors import MISSING_KEY, friendly_error
 from .limits import DailyLimiter, session_block
-from .scroll import scroll_to_bottom
+from .scroll import follow_scroll, scroll_to_bottom
+from .stop import commit_stopped
 from .views import DISCLAIMER, TITLE, password_gate, show_message
 
 log = logging.getLogger("bki_rag.web")
@@ -34,9 +35,11 @@ def _ask(rag: RAG, question: str) -> None:
     show_message(ss.messages[-1])
     scroll_to_bottom()
     with st.chat_message("assistant"):
+        st.button("⏹ Hentikan", key="stop")
         box = st.empty()
         box.caption("Mencari jawaban...")
         parts: list[str] = []
+        ss.pending = parts
 
         # Tampilkan jawaban selagi ditulis; sitasi dirapikan setelah selesai.
         def show_text(delta: str) -> None:
@@ -48,8 +51,10 @@ def _ask(rag: RAG, question: str) -> None:
         except Exception as exc:
             log.exception("answer failed")
             box.empty()
+            ss.pop("pending", None)
             st.error(friendly_error(exc))
             return
+    ss.pop("pending", None)
     ss.messages.append({"role": "assistant", "content": res["answer"], "sources": res["sources"],
                         "lang": res["query"].get("lang", "id")})
     ss.scroll_down = True
@@ -70,6 +75,8 @@ def main() -> None:
     ss.setdefault("messages", [])
     ss.setdefault("asked", 0)
     ss.setdefault("last_ask", 0.0)
+    commit_stopped()
+    follow_scroll()
     with st.sidebar:
         if st.button("Percakapan baru", use_container_width=True):
             ss.messages = []
