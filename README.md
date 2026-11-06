@@ -110,7 +110,7 @@ bki/
 │   ├── retrieval/            Tahap 6a: restricted.py, query.py, retriever.py
 │   ├── generation/           Tahap 6b: sources.py, reply.py, citations.py, answer.py
 │   ├── evaluation/           golden.py, retrieval_eval.py, answer_eval.py, judge.py, guard.py, report.py, runner.py
-│   └── app/                  terminal.py dan web/ (page.py, views.py, limits.py, errors.py)
+│   └── app/                  terminal.py dan web/ (page.py, views.py, scroll.py, limits.py, errors.py)
 └── data/
     ├── index/                index yang dipakai aplikasi (di-commit, ±34 MB)
     ├── processed/            dokumen & chunk bersih + laporan pembersihan

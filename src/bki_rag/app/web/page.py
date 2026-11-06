@@ -12,6 +12,7 @@ from ...generation.answer import RAG
 from ...generation.citations import hide_citations
 from .errors import MISSING_KEY, friendly_error
 from .limits import DailyLimiter, session_block
+from .scroll import scroll_to_bottom
 from .views import DISCLAIMER, TITLE, password_gate, show_message
 
 log = logging.getLogger("bki_rag.web")
@@ -31,6 +32,7 @@ def _ask(rag: RAG, question: str) -> None:
     history = [{"role": m["role"], "content": m["content"]} for m in ss.messages][-6:]
     ss.messages.append({"role": "user", "content": question})
     show_message(ss.messages[-1])
+    scroll_to_bottom()
     with st.chat_message("assistant"):
         box = st.empty()
         box.caption("Mencari jawaban...")
@@ -50,6 +52,7 @@ def _ask(rag: RAG, question: str) -> None:
             return
     ss.messages.append({"role": "assistant", "content": res["answer"], "sources": res["sources"],
                         "lang": res["query"].get("lang", "id")})
+    ss.scroll_down = True
     st.rerun()
 
 
@@ -73,6 +76,8 @@ def main() -> None:
             st.rerun()
     for msg in ss.messages:
         show_message(msg)
+    if ss.pop("scroll_down", False):
+        scroll_to_bottom()
 
     question = (st.chat_input("Tulis pertanyaan tentang BKI...", max_chars=C.MAX_QUESTION_CHARS) or "").strip()
     if not question:
